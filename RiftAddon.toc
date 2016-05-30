@@ -1,0 +1,31 @@
+Identifier = "Additional"
+Name = "Additional"
+NameShort = "Additional"
+Description = ""
+Version = "0.9"
+
+Author = "Kuraeno@Hailol"
+Email = "mail@requinix.net"
+
+Dependencies = {
+	LibUnitChange = {"required", "before"}
+}
+
+RunOnStartup = {
+	"Init.lua",
+	"InitData.lua",
+	"InitEvents.lua",
+	"Dimension.lua",
+	"MiniMap.lua",
+	"Proximity.lua",
+	"Testing.lua",
+	"Tracking.lua",
+	"Tracking/Currency.lua",
+	"Tracking/Item.lua",
+	"Tracking/Notoriety.lua"
+}
+
+SavedVariables = {
+	AdditionalCache = "global",
+	AdditionalConfig = "account"
+}
