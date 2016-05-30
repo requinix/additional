@@ -1,15 +1,6 @@
 local addon, data = ...
 local module = data.Modules:Register("Testing", "test")
 
---Command.Event.Attach(Library.LibUnitChange.Register("player.target.target"), function(h, targettarget)
---	local player = Inspect.Unit.Detail("player")
---	local target = Inspect.Unit.Detail("player.target")
---	if player and target and targettarget then
---		local d = math.sqrt(math.pow(player.coordX - target.coordX, 2) + math.pow(player.coordY - target.coordY, 2) + math.pow(player.coordZ - target.coordZ, 2))
---		printf("level %d | distance %.3f | radius %.3f", target.level, d, target.radius or 0)
---	end
---end, "Additional.Testing:player.target.target")
-
 --- DIST TO TARGET ---
 do
 

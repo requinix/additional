@@ -1,0 +1,34 @@
+--- CORE ---
+
+DATA
+
+EVENTS
+
+UI
+
+* [v1.1] New: Frame helpers
+
+--- MODULES ---
+
+DIMENSION
+
+* Change: Restore displayed tooltip for a single item if the tooltip is overwritten and then cleared
+
+MINIMAP
+
+* Feature: Artifacts (requires tracking vial or Patron buff)
+
+PROXIMITY
+
+TESTING
+
+TRACKING
+
+* [v1] Bug: Inventory not loaded automatically; requires manipulating items to be picked up through events
+* Bug: The item icons that "move" into bags when picking up new items are covered up by tracking bars
+* [v1.1] Change: Use Canvas for progress bars instead of Frame/Bar/BarContainer
+* Change: Allow tracking of unknown items by putting them in the pending queue
+* Change: Show tracking bars for pending items (without progress information)
+* Feature: Quest items
+* Feature: Achievements
+* Feature: Countdown mode

@@ -90,9 +90,9 @@ module.RegisterConfig(function(saved)
 	for k, v in pairs(sources) do
 		if v.DefaultColors then
 			config.Colors[k] = {}
-			config.Colors[k].Normal = saved.Colors and saved.Colors[k] and saved.Colors[k].NormalZ or v.DefaultColors.Normal
-			config.Colors[k].Goal = saved.Colors and saved.Colors[k] and saved.Colors[k].GoalZ or v.DefaultColors.Goal
-			config.Colors[k].Max = saved.Colors and saved.Colors[k] and saved.Colors[k].MaxZ or v.DefaultColors.Max
+			config.Colors[k].Normal = saved.Colors and saved.Colors[k] and saved.Colors[k].Normal or v.DefaultColors.Normal
+			config.Colors[k].Goal = saved.Colors and saved.Colors[k] and saved.Colors[k].Goal or v.DefaultColors.Goal
+			config.Colors[k].Max = saved.Colors and saved.Colors[k] and saved.Colors[k].Max or v.DefaultColors.Max
 		end
 	end
 

@@ -1,0 +1,23 @@
+Except for bags, inventory items are not available on load and no known event (including either Item event) fires after startup. LootCounter and Imhothar's Bags use a delay before doing an Inspect for items.
+
+Resource node icons on the minimap are only present if the respective buffs are active. Nodes automatically appear when in range and disappear when out of range.
+
+Minimap has 9 levels of zoom at 1.25x.
+
+Frames cannot be destroyed and will not be cleaned up. Reuse them.
+
+The X axis is east/west, the Y axis is up/down, and the Z axis is north/south.
+
+Currency and/or notoriety (I forget) is not immediately available on game load, but their events will fire containing all data. On a reload, information is immediately available and the events do not fire.
+
+Running Lua 5.1 (see _VERSION). Functions not available: loadfile
+
+Preferred steps for (adding,) displaying, and (removing) information: (add items with constant configuration,) display with variable configuration and accurate data, (hide item, remove item by destroying data and setting UI elements aside for reuse).
+
+Units cannot be inspected until they've reached close proximity (<=150m) and/or line of sight; once out of sight they cannot be re-inspected, even with known IDs.
+
+Aggro distance appears variable but is most predictable using the outer (coordinate) distance. Starter area mobs (levels <= ~12) seem to have special treatment. Lowest distance appears to be <= player level minus 20 (at level 65). Pending further study. https://docs.google.com/spreadsheets/d/1QWDNM32ww_6q5CS5gBvD5Qfh3ml_nsGOlQejl_AbRT0
+
+Minion adventure data does not include whether it is rare (requires credits). MinionSender remembers past card IDs, attempts to send on the first action, and on the second click will shuffle if the card ID is the same.
+
+Consider a frame A pinned to a point on frame B, and frame B is pinned to a point on frame A. Recursion detection happens on the second visit to a frame. If the frames are pinned to different axes then it's possible but unlikely that the recursion will be avoided, depending on which axes are evaluated in what order.
