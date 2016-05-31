@@ -63,13 +63,13 @@ do
 
 local clipboard
 
-module.RegisterCommand("copy", "Copy information about the selection", function()
+module:RegisterCommand("copy", "Copy information about the selection", function()
 	local s, count = GetSelection()
 	if count == 0 then
-		module.Error("No selection")
+		module:Error("No selection")
 		return
 	elseif count > 1 then
-		module.Error("Cannot copy multiple items")
+		module:Error("Cannot copy multiple items")
 		return
 	end
 
@@ -77,15 +77,15 @@ module.RegisterCommand("copy", "Copy information about the selection", function(
 	print("Copied " .. clipboard.Item.name)
 end)
 
-module.RegisterCommand("paste <field>", "Paste a copied value onto the selection", function(field)
+module:RegisterCommand("paste <field>", "Paste a copied value onto the selection", function(field)
 	if not field then
-		module.Error("Field required")
+		module:Error("Field required")
 		return
 	elseif not clipboard then
-		module.Error("Clipboard is empty")
+		module:Error("Clipboard is empty")
 		return
 	elseif not clipboard.Dimension[field] then
-		module.Error("Invalid field")
+		module:Error("Invalid field")
 		return
 	end
 
@@ -95,9 +95,9 @@ module.RegisterCommand("paste <field>", "Paste a copied value onto the selection
 	end
 end)
 
-module.RegisterCommand("paste-orientation", "Paste copied orientation onto the selection", function()
+module:RegisterCommand("paste-orientation", "Paste copied orientation onto the selection", function()
 	if not clipboard then
-		module.Error("Clipboard is empty")
+		module:Error("Clipboard is empty")
 		return
 	end
 

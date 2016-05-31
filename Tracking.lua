@@ -9,7 +9,7 @@ local pending = {}
 local reusable = {}
 local sources = { --[[
 	source = {
-		-- {Color and/or DefaultColors} Data Description IdField [MaxIndex] NameIndex [Tier] ValueFormat ValueIndex
+		-- {Color and/or DefaultColors} Data Description IdIndex [MaxIndex] NameIndex [Tier] ValueFormat ValueIndex
 		Color = function(data, value, goal, max)
 			return { R, G, B }
 		end,
@@ -20,7 +20,7 @@ local sources = { --[[
 			Max = { R, G, B }
 		},
 		Description = "string",
-		IdField = "index",
+		IdIndex = "index",
 		MaxIndex = "index",
 		NameIndex = "index",
 		Tier = function(value)
@@ -41,29 +41,29 @@ local Track
 
 --- COMMANDS ---
 
-module.RegisterCommand("add <type> <name> [<goal>]", "Add or update a value to track", function(type, name, goal)
+module:RegisterCommand("add <type> <name> [<goal>]", "Add or update a value to track", function(type, name, goal)
 	if type and not sources[type] then
-		module.Error("Invalid source: " .. type)
+		module:Error("Invalid source: " .. type)
 	elseif type and name and not Track(type, name, goal) then
-		module.Error("No " .. type .. " named '" .. name .. "'")
+		module:Error("No " .. type .. " named '" .. name .. "'")
 	end
 end)
 
-module.RegisterCommand("pending", "Show pending status", function()
+module:RegisterCommand("pending", "Show pending status", function()
 	for k, v in pairs(pending) do
 		printf("Pending: %s '%s' (%s goal)", v.type, v.name, v.goal or "no")
 	end
 end)
 
-module.RegisterCommand("refresh", "Refresh", function()
+module:RegisterCommand("refresh", "Refresh", function()
 	Refresh()
 end)
 
-module.RegisterCommand("remove <type> <name>", "Stop tracking a value", function(type, name)
+module:RegisterCommand("remove <type> <name>", "Stop tracking a value", function(type, name)
 	local source = Find(type, name)
-	local id = source and source[sources[type].IdField]
+	local id = source and source[sources[type].IdIndex]
 	if type and not sources[type] then
-		module.Error("Invalid source: " .. type)
+		module:Error("Invalid source: " .. type)
 	elseif source and bars[id] then
 		RemoveBar(id)
 	else
@@ -77,7 +77,7 @@ module.RegisterCommand("remove <type> <name>", "Stop tracking a value", function
 	end
 end)
 
-module.RegisterCommand("sources", "List tracking sources", function()
+module:RegisterCommand("sources", "List tracking sources", function()
 	for k, v in pairs(sources) do
 		print(k .. " - " .. v.Description)
 	end
@@ -85,12 +85,12 @@ end)
 
 --- CONFIGURATION ---
 
-module.RegisterConfig(function(saved)
+module:RegisterConfig(function(saved)
 	config.Colors = {}
 	for k, v in pairs(sources) do
 		if v.DefaultColors then
 			config.Colors[k] = {}
-			config.Colors[k].Normal = saved.Colors and saved.Colors[k] and saved.Colors[k].Normal or v.DefaultColors.Normal
+			config.Colors[k].Normal = saved.Colors and saved.Colors[k] and saved.Colors[k].NormalZ or v.DefaultColors.Normal
 			config.Colors[k].Goal = saved.Colors and saved.Colors[k] and saved.Colors[k].Goal or v.DefaultColors.Goal
 			config.Colors[k].Max = saved.Colors and saved.Colors[k] and saved.Colors[k].Max or v.DefaultColors.Max
 		end
@@ -352,7 +352,7 @@ Track = function(type, key, goal)
 		return false
 	end
 
-	local id = source[sources[type].IdField]
+	local id = source[sources[type].IdIndex]
 	config.Tracking[id] = config.Tracking[id] or {}
 	config.Tracking[id].type = type
 	config.Tracking[id].id = id

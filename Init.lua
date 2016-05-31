@@ -67,7 +67,7 @@ setmetatable(data.Commands, { __index = {
 			for w in term:gmatch("[^%s]+") do
 				table.insert(t, w)
 			end
-			table.insert(t, qterm)
+			table.insert(t, (qterm:gsub("\\\"", "\"")))
 			pos = p
 		end
 		for term in argument:sub(pos):gmatch("%s*([^%s]+)") do
@@ -115,6 +115,15 @@ setmetatable(data.Config, { __index = {
 
 data.Events = {}
 setmetatable(data.Events, { __index = {
+	AttachWhile = function(event, callback, name)
+		local handler
+		handler = function(...)
+			if not callback(...) then
+				Command.Event.Detach(event, handler, name .. "<While>")
+			end
+		end
+		return Command.Event.Attach(event, handler, name .. "<While>")
+	end,
 	Invoke = function(self, key, ...)
 		if self[key] then
 			self[key].Invoke(...)
@@ -131,23 +140,27 @@ setmetatable(data.Events, { __index = {
 }})
 
 data.Modules = {}
+local modulesmt = { __index = {
+	Error = function(self, message)
+		Command.Console.Display("general", false, "<font color=\"#FF0000\">" .. self.name .. ": " .. message .. "</font>", true)
+	end,
+	RegisterCache = function(self, load, save)
+		data.Cache:Register(self.name, load, save)
+	end,
+	RegisterCommand = function(self, spec, description, callback)
+		data.Commands:Register(self.abbrev, spec, description, callback)
+	end,
+	RegisterConfig = function(self, load, save)
+		data.Config:Register(self.name, load, save)
+	end
+}}
 setmetatable(data.Modules, { __index = {
 	Register = function(self, name, abbrev)
-		self[name] = abbrev
-		return {
-			Error = function(message)
-				Command.Console.Display("general", false, "<font color=\"#FF0000\">" .. message .. "</font>", true)
-			end,
-			RegisterCache = function(load, save)
-				data.Cache:Register(name, load, save)
-			end,
-			RegisterCommand = function(command, description, callback)
-				data.Commands:Register(abbrev, command, description, callback)
-			end,
-			RegisterConfig = function(load, save)
-				data.Config:Register(name, load, save)
-			end
+		self[abbrev] = {
+			abbrev = abbrev,
+			name = name
 		}
+		return setmetatable(self[abbrev], modulesmt)
 	end
 }})
 

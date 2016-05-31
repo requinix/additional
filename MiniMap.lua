@@ -24,7 +24,7 @@ local ShowNode
 local TestNode
 local UpdateNodes
 
-module.RegisterCache(function(static, versioned)
+module:RegisterCache(function(static, versioned)
 	cache.NodeTypes = static.NodeTypes or {}
 	cache.NodeTypeMap = versioned.NodeTypeMap or { Fish = false, Ore = false, Plant = false, Wood = false }
 
@@ -41,7 +41,7 @@ end, function()
 	}
 end)
 
-module.RegisterCommand("debug [<mode>]", "Enable/disable/toggle debug mode", function(mode)
+module:RegisterCommand("debug [<mode>]", "Enable/disable/toggle debug mode", function(mode)
 	local enable = not config.Debug and (not mode or mode == "toggle") or mode and (mode == "on" or mode == "enable")
 	if enable and not config.Debug then
 		overlay:SetBackgroundColor(1.0, 1.0, 1.0, 0.5)
@@ -53,11 +53,11 @@ module.RegisterCommand("debug [<mode>]", "Enable/disable/toggle debug mode", fun
 	config.Debug = enable
 end)
 
-module.RegisterCommand("refresh", "Refresh", function()
+module:RegisterCommand("refresh", "Refresh", function()
 	Refresh()
 end)
 
-module.RegisterCommand("zoom {in|out}", "Zoom in or out", function(dir)
+module:RegisterCommand("zoom {in|out}", "Zoom in or out", function(dir)
 	if dir == "in" and config.ZoomLevel < 9 then
 		config.ZoomLevel = config.ZoomLevel + 1
 		UpdateNodes()
@@ -67,7 +67,7 @@ module.RegisterCommand("zoom {in|out}", "Zoom in or out", function(dir)
 	end
 end)
 
-module.RegisterConfig(function(saved)
+module:RegisterConfig(function(saved)
 	config.Debug = saved.Debug or false
 	config.IconSize = saved.IconSize or 10
 	config.LabelFontSize = saved.LabelFontSize or 12

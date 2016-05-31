@@ -4,15 +4,15 @@ local module = data.Modules:Register("Testing", "test")
 --- DIST TO TARGET ---
 do
 
-module.RegisterCommand("dist-to-target", "Show the distance between the player and target", function()
+module:RegisterCommand("dist-to-target", "Show the distance between the player and target", function()
 	local player = Inspect.Unit.Detail("player")
 	if not player or player.availability ~= "full" then
-		module.Error("Player not available")
+		module:Error("Player not available")
 		return
 	end
 	local target = Inspect.Unit.Detail("player.target")
 	if not target or target.availability ~= "full" then
-		module.Error("Target not available")
+		module:Error("Target not available")
 		return
 	end
 	dump(math.sqrt(math.pow(player.coordX - target.coordX, 2) + math.pow(player.coordY - target.coordY, 2) + math.pow(player.coordZ - target.coordZ, 2)))
@@ -22,13 +22,13 @@ end
 --- DUMP KEYS ---
 do
 
-module.RegisterCommand("dumpkeys <value>", "Dump keys from a table", function(arg)
+module:RegisterCommand("dumpkeys <value>", "Dump keys from a table", function(arg)
 	local value = assert(loadstring("return " .. arg))()
 	if not value then
-		module.Error("Invalid value")
+		module:Error("Invalid value")
 		return
 	elseif not istable(value) then
-		module.Error("Value is a " .. type(value))
+		module:Error("Value is a " .. type(value))
 		return
 	end
 
@@ -41,10 +41,37 @@ module.RegisterCommand("dumpkeys <value>", "Dump keys from a table", function(ar
 end)
 
 end
+--- FIND THINGS ---
+do
+
+module:RegisterCommand("find-currency <name>", "Find a currency on the player", function(name)
+	local lname = name:lower()
+	if lname == "coin" then
+		dump(Inspect.Currency.Detail("coin"))
+		return
+	end
+
+	for k, v in pairs(Inspect.Currency.Detail(Inspect.Currency.List())) do
+		if v.name:lower() == lname then
+			dump(v)
+		end
+	end
+end)
+
+module:RegisterCommand("find-notoriety <name>", "Find faction notoriety on the player", function(name)
+	local lname = name:lower()
+	for k, v in pairs(Inspect.Faction.Detail(Inspect.Faction.List())) do
+		if v.name:lower() == lname then
+			dump(v)
+		end
+	end
+end)
+
+end
 --- INSPECT ---
 do
 
-module.RegisterCommand("inspect [<identifier>]", "Inspect the target or an identifier", function(id)
+module:RegisterCommand("inspect [<identifier>]", "Inspect the target or an identifier", function(id)
 	dump(Inspect.Unit.Detail(id ~= "" and id or "player.target"))
 end)
 
@@ -62,17 +89,17 @@ overlaytext:SetFontSize(18)
 overlaytext:SetEffectGlow({ strength = 3 })
 overlaytext:SetPoint("CENTER", overlay, "CENTER")
 
-module.RegisterCommand("overlay-copy <element>", "Create a testing overlay using a copy of an element", function(element)
+module:RegisterCommand("overlay-copy <element>", "Create a testing overlay using a copy of an element", function(element)
 	local e = assert(loadstring("return " .. element))()
 	if not e then
-		module.Error("Invalid element")
+		module:Error("Invalid element")
 		return
 	end
 
 	overlay:SetAllPoints(e)
 	overlay:SetVisible(true)
 end)
-module.RegisterCommand("overlay-remove", "Remove a testing overlay", function()
+module:RegisterCommand("overlay-remove", "Remove a testing overlay", function()
 	overlay:SetVisible(false)
 end)
 

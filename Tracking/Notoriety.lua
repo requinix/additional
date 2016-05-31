@@ -9,7 +9,7 @@ data.Events:Invoke("Tracking.SourceRegistration", source, {
 		Max = { 0.0, 0.75, 0.25 }
 	},
 	Description = "Faction notoriety",
-	IdField = "id",
+	IdIndex = "id",
 	NameIndex = "name",
 	ValueFormat = "%d",
 	ValueIndex = "notoriety",

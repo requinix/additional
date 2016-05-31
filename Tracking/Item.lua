@@ -4,7 +4,39 @@ local source = "item"
 local history = {}
 local items = {}
 
-local ProcessSlots
+Command.Event.Attach(Event.Addon.Startup.End, function()
+	local bags = Inspect.Item.Detail(Utility.Item.Slot.Inventory("bag"))
+	local framestart = Inspect.Time.Frame()
+	data.Events.AttachWhile(Event.System.Update.Begin, function()
+		-- pick a bag
+		local k, v = next(bags)
+		if not k then
+			-- no more bags. stop
+			return false
+		elseif Inspect.Time.Frame() - framestart > 5 then
+			-- too much time has passed (!?)
+			data.Modules["Tracking"]:Error("Failed to load inventory items")
+			return false
+		elseif not Inspect.Item.List(k) then
+			-- bag does not exist (!?)
+			bags[k] = nil
+			return true
+		end
+
+		local inventory, bag, b = Utility.Item.Slot.Parse(k)
+		local first = Utility.Item.Slot.Inventory(b, 1)
+		-- check first slot
+		if Inspect.Item.List(first) == nil then
+			-- first slot not ready
+			return true
+		end
+
+		-- ready. dequeue bag and process slots
+		bags[k] = nil
+		data.Events:Invoke("Tracking.SourceUpdate", source, ProcessSlots(Utility.Item.Slot.Inventory(b)))
+		return true
+	end, "Additional.Tracking.Item:System.Update.Begin")
+end, "Additional.Tracking.Item:Addon.Startup.End")
 
 Command.Event.Attach(Event.Item.Slot, function(h, updates)
 	data.Events:Invoke("Tracking.SourceUpdate", source, ProcessSlots(updates))
@@ -66,12 +98,12 @@ end
 
 data.Events:Invoke("Tracking.SourceRegistration", source, {
 	Color = function(item, value, goal) return item.rarity and data.COLORS.Item[item.rarity] or data.COLORS.Item.Common end,
-	Data = ProcessSlots(Utility.Item.Slot.Inventory()),
+	Data = {},
 	DefaultColors = {
 		Goal = { 0.75, 0.5, 0.0 }
 	},
 	Description = "Inventory items",
-	IdField = "type",
+	IdIndex = "type",
 	NameIndex = "name",
 	ValueFormat = "%d",
 	ValueIndex = "count"
