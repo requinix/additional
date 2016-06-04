@@ -41,33 +41,6 @@ module:RegisterCommand("dumpkeys <value>", "Dump keys from a table", function(ar
 end)
 
 end
---- FIND THINGS ---
-do
-
-module:RegisterCommand("find-currency <name>", "Find a currency on the player", function(name)
-	local lname = name:lower()
-	if lname == "coin" then
-		dump(Inspect.Currency.Detail("coin"))
-		return
-	end
-
-	for k, v in pairs(Inspect.Currency.Detail(Inspect.Currency.List())) do
-		if v.name:lower() == lname then
-			dump(v)
-		end
-	end
-end)
-
-module:RegisterCommand("find-notoriety <name>", "Find faction notoriety on the player", function(name)
-	local lname = name:lower()
-	for k, v in pairs(Inspect.Faction.Detail(Inspect.Faction.List())) do
-		if v.name:lower() == lname then
-			dump(v)
-		end
-	end
-end)
-
-end
 --- INSPECT ---
 do
 
@@ -79,7 +52,7 @@ end
 --- OVERLAY ---
 do
 
-local overlay = UI.CreateFrame("Frame", "Additional.Testing.overlay", data.UIContext)
+local overlay = UI.CreateFrame("Frame", "Additional.Testing.overlay", data.UI.Context)
 overlay:SetBackgroundColor(1.0, 1.0, 1.0, 0.5)
 overlay:SetVisible(false)
 

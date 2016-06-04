@@ -9,7 +9,7 @@ local pending = {}
 local reusable = {}
 local sources = { --[[
 	source = {
-		-- {Color and/or DefaultColors} Data Description IdIndex [MaxIndex] NameIndex [Tier] ValueFormat ValueIndex
+		-- {Color and/or DefaultColors} Data Description [Icon] IdIndex [MaxIndex] NameIndex [Tier] ValueFormat ValueIndex
 		Color = function(data, value, goal, max)
 			return { R, G, B }
 		end,
@@ -20,6 +20,9 @@ local sources = { --[[
 			Max = { R, G, B }
 		},
 		Description = "string",
+		Icon = function(data)
+			return texturesource, textureid
+		},
 		IdIndex = "index",
 		MaxIndex = "index",
 		NameIndex = "index",
@@ -139,6 +142,7 @@ end)
 AddBar = function(bardata)
 	bars[bardata.id] = bars[bardata.id] or table.remove(reusable) or {}
 	local b = bars[bardata.id]
+	local s = sources[bardata.type]
 
 	b.data = bardata
 	b.sortable = bardata.type .. "," .. bardata.name:gsub("^[Tt]he%s+", ""):gsub("^[Aa]n?%s+", "")
@@ -163,7 +167,7 @@ AddBar = function(bardata)
 	end
 
 	if not b.Frame then
-		b.Frame = UI.CreateFrame("Frame", "Additional.Tracking.bars#" .. framecounter .. ".Frame", data.UIContext)
+		b.Frame = UI.CreateFrame("Frame", "Additional.Tracking.bars#" .. framecounter .. ".Frame", data.UI.Context)
 		b.Frame:SetBackgroundColor(0.75, 0.75, 0.0)
 		b.Frame:SetHeight(22)
 	end
@@ -183,13 +187,26 @@ AddBar = function(bardata)
 		b.Bar:SetPoint("TOPLEFT", b.BarContainer, "TOPLEFT", 1, 1)
 	end
 
+	if not b.Icon then
+		b.Icon = UI.CreateFrame("Texture", "Additional.Tracking.bars#" .. framecounter .. ".Icon", b.Frame)
+		b.Icon:SetPoint("TOPRIGHT", b.BarContainer, "TOPLEFT", -2, 0)
+		b.Icon:SetPoint("BOTTOMRIGHT", b.BarContainer, "BOTTOMLEFT", -2, 0)
+		b.Icon:SetWidth(b.Icon:GetHeight())
+	end
+	if s.Icon then
+		b.Icon:SetTexture(s.Icon(bardata))
+		b.Icon:SetVisible(true)
+	else
+		b.Icon:SetVisible(false)
+	end
+
 	if not b.Label then
 		b.Label = UI.CreateFrame("Text", "Additional.Tracking.bars#" .. framecounter .. ".Label", b.Frame)
 		b.Label:SetEffectGlow({ strength = 4 })
 		b.Label:SetFontColor(1.0, 1.0, 1.0)
 		b.Label:SetFontSize(12)
-		b.Label:SetPoint("CENTERRIGHT", b.Frame, "CENTERLEFT", -2, 0)
 	end
+	b.Label:SetPoint("CENTERRIGHT", s.Icon and b.Icon or b.Frame, "CENTERLEFT", -2, 0)
 	b.Label:SetText(bardata.name)
 
 	if not b.Progress then
@@ -200,7 +217,7 @@ AddBar = function(bardata)
 		b.Progress:SetLayer(2)
 	end
 	b.Progress:ClearAll()
-	if sources[bardata.type].Tier then
+	if s.Tier then
 		b.Progress:SetPoint("CENTERRIGHT", b.BarContainer, "CENTERRIGHT", -2, 0)
 	else
 		b.Progress:SetPoint("CENTER", b.BarContainer, "CENTER", -2, 0)
@@ -333,6 +350,7 @@ ShowBar = function(bar)
 
 	bar.Bar:SetBackgroundColor(unpack(color))
 	bar.Bar:SetPoint("BOTTOMRIGHT", bar.BarContainer, percent, 1.0, 0, -1)
+	bar.Bar:SetVisible(percent > 0.005)
 	bar.Progress:SetText(progress)
 	bar.Progress:SetVisible(not tier or value < max)
 
@@ -354,10 +372,10 @@ Track = function(type, key, goal)
 
 	local id = source[sources[type].IdIndex]
 	config.Tracking[id] = config.Tracking[id] or {}
-	config.Tracking[id].type = type
 	config.Tracking[id].id = id
-	config.Tracking[id].name = source[sources[type].NameIndex]
 	config.Tracking[id].goal = goal and tonumber(goal)
+	config.Tracking[id].name = source[sources[type].NameIndex]
+	config.Tracking[id].type = type
 
 	if bars[id] then
 		ShowBar(bars[id])

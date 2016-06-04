@@ -12,17 +12,23 @@ Dependencies = {
 }
 
 RunOnStartup = {
+	-- CORE
 	"Init.lua",
-	"InitData.lua",
-	"InitEvents.lua",
-	"Dimension.lua",
-	"MiniMap.lua",
-	"Proximity.lua",
-	"Testing.lua",
-	"Tracking.lua",
-	"Tracking/Currency.lua",
-	"Tracking/Item.lua",
-	"Tracking/Notoriety.lua"
+	"Data.lua",
+	"Events.lua",
+	"UI.lua",
+
+	-- MODULES
+	"Modules/Dimension.lua",
+	"Modules/MiniMap.lua",
+	"Modules/Proximity.lua",
+	"Modules/Testing.lua",
+	"Modules/Tracking.lua",
+
+	-- PLUGINS
+	"Plugins/Currency.lua",
+	"Plugins/Item.lua",
+	"Plugins/Notoriety.lua"
 }
 
 SavedVariables = {

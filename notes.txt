@@ -16,7 +16,7 @@ Running Lua 5.1 (see _VERSION). Functions not available: dofile, loadfile
 
 Preferred steps for (adding,) displaying, and (removing) information: (add items with constant configuration,) display with variable configuration and accurate data, (hide item, remove item by destroying data and setting UI elements aside for reuse).
 
-Units cannot be inspected until they've reached close proximity (<=150m) and/or line of sight; once out of sight they cannot be re-inspected, even with known IDs.
+Units cannot be inspected until they've reached close proximity (generally <=150m) and/or line of sight; once out of sight they cannot be re-inspected, even with known IDs.
 
 Aggro distance appears variable but is most predictable using the outer (coordinate) distance. Starter area mobs (levels <= ~12) seem to have special treatment. Lowest distance appears to be <= player level minus 20 (at level 65). Pending further study. https://docs.google.com/spreadsheets/d/1QWDNM32ww_6q5CS5gBvD5Qfh3ml_nsGOlQejl_AbRT0
 

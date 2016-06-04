@@ -82,7 +82,7 @@ setmetatable(data.Commands, { __index = {
 				local argv = self.ParseArguments(argument)
 				local command = table.remove(argv, 1)
 				self:Call(abbrev, command, argv)
-			end, "Additional.Init:/add. " .. abbrev)
+			end, "Additional.Init:/add." .. abbrev)
 		end
 		local command = spec:match("[^%s]+")
 		if not self[abbrev][command] then
@@ -155,6 +155,14 @@ local modulesmt = { __index = {
 	end
 }}
 setmetatable(data.Modules, { __index = {
+	Named = function(self, name)
+		for k, v in pairs(self) do
+			if v.name == name then
+				return v
+			end
+		end
+		return nil
+	end,
 	Register = function(self, name, abbrev)
 		self[abbrev] = {
 			abbrev = abbrev,
@@ -163,10 +171,6 @@ setmetatable(data.Modules, { __index = {
 		return setmetatable(self[abbrev], modulesmt)
 	end
 }})
-
--- DATA INITIALIZATION ---
-
-data.UIContext = UI.CreateContext(addon.identifier)
 
 --- EVENT REGISTRATION ---
 

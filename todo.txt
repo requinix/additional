@@ -1,3 +1,7 @@
+--- GENERAL ---
+
+* [v1.2] Change: Use pcall to avoid data loss due to errors
+
 --- CORE ---
 
 DATA
@@ -9,8 +13,6 @@ THREAD
 * [v1.2] New: Coroutine helpers
 
 UI
-
-* [v1.1] New: Frame helpers
 
 --- MODULES ---
 
@@ -25,7 +27,6 @@ MINIMAP
 
 PROXIMITY
 
-* [v1.1] New: Proximity on target's target
 * New: Proximity on group and raid members, for party and raid frames
 
 TESTING
@@ -33,11 +34,24 @@ TESTING
 TRACKING
 
 * Bug: The item icons that "move" into bags when picking up new items are covered up by tracking bars
-* [v1.1] Change: Use Canvas for progress bars instead of Frame/Bar/BarContainer
-* Change: Allow tracking of unknown items by putting them in the pending queue
-* Change: Show tracking bars for pending items (without progress information)
+* [v1.1] Change: Use Canvas for progress bars
+* Change: Allow tracking of unknown stuff by putting them in the pending queue
+* Change: Show tracking bars for pending stuff (without progress information)
 * New: Support for quest items
 * New: Support for achievements
 * New: Countdown mode
-* New: Support icons (eg, for currency and items)
 * New: Configuration
+* New: "Popup" notification when meeting goal
+* New: Click a bar to change or remove it
+
+--- PLUGINS ---
+
+CURRENCY
+
+* (Tracking) Bug: Items are also tracked through bank slots
+* (Tracking) New: Auto-track currencies that are near max
+* (Tracking) Change: Need a better icon for credits - can't find anything official
+
+ITEM
+
+NOTORIETY

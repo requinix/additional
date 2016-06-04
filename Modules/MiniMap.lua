@@ -8,7 +8,7 @@ local learning = 0
 local maxx, maxz
 local minimap = UI.Native.MapMini
 local nodes = {}
-local overlay = UI.CreateFrame("Frame", "Additional.MiniMap.overlay", data.UIContext)
+local overlay = UI.CreateFrame("Frame", "Additional.MiniMap.overlay", data.UI.Context)
 local player
 local playerlast = { false, false, false }
 local reusable = {}

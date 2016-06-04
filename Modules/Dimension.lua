@@ -108,6 +108,47 @@ module:RegisterCommand("paste-orientation", "Paste copied orientation onto the s
 end)
 
 end
+--- EDIT ---
+do
+
+module:RegisterCommand("get [<field>]", "Get dimension information about the selection", function(field)
+	local selection, count = GetSelection()
+	for k, v in pairs(selection) do
+		if not field then
+			dump(v.Dimension)
+		elseif count == 1 then
+			dump(v.Dimension[field])
+		else
+			dump(v.Dimension.name, v.Dimension[field])
+		end
+	end
+end)
+
+module:RegisterCommand("get-item [<field>]", "Get item information about the selection", function(field)
+	local selection, count = GetSelection()
+	for k, v in pairs(selection) do
+		if not field then
+			dump(v.Item)
+		elseif count == 1 then
+			dump(v.Item[field])
+		else
+			dump(v.Item.name, v.Item[field])
+		end
+	end
+end)
+
+module:RegisterCommand("set <field> <value>", "Set dimension information about the selection", function(field, value)
+	if not ({ coordX = true, coordY = true, coordZ = true, pitch = true, roll = true, scale = true, yaw = true })[field] then
+		module:Error("Invalid field")
+		return
+	end
+	local update = { [field] = tonumber(value) }
+	for k, v in pairs((GetSelection())) do
+		Command.Dimension.Layout.Place(v.Dimension.id, update)
+	end
+end)
+
+end
 --- TOOLTIP ---
 do
 
@@ -115,7 +156,7 @@ local changing = false
 local inuse = false
 
 local tooltip = {
-	frame = UI.CreateFrame("Frame", "Additional.Dimension.tooltip.frame", data.UIContext)
+	frame = UI.CreateFrame("Frame", "Additional.Dimension.tooltip.frame", data.UI.Context)
 }
 
 tooltip.background = UI.CreateFrame("Texture", "Additional.Dimension.tooltip.background", tooltip.frame)

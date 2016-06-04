@@ -1,11 +1,38 @@
 local addon, data = ...
 local source = "currency"
 
+--- TESTING: FIND CURRENCY ---
+do
+
+data.Modules:Named("Testing"):RegisterCommand("find-currency <name>", "Find a currency on the player", function(name)
+	local lname = name:lower()
+	if lname == "coin" then
+		dump(Inspect.Currency.Detail("coin"))
+		return
+	end
+
+	for k, v in pairs(Inspect.Currency.Detail(Inspect.Currency.List())) do
+		if v.name:lower() == lname then
+			dump(v)
+		end
+	end
+end)
+
+end
+
+--- TRACKING ---
+do
+
+local icons = {
+	coin = "icons/currency.coin.png",
+	credit = "icons/currency.credit.png"
+}
+
 local ProcessCurrencies
 
 Command.Event.Attach(Event.Currency, function(h, currencies)
 	data.Events:Invoke("Tracking.SourceUpdate", source, ProcessCurrencies(currencies))
-end, "Additional.Tracking.Currency:Currency")
+end, "Additional.Plugins.Currency:Tracking:Currency")
 
 ProcessCurrencies = function(currencies)
 	local c = {}
@@ -22,7 +49,6 @@ ProcessCurrencies = function(currencies)
 	return c
 end
 
--- {Color and/or DefaultColors} Data Description IdIndex [MaxIndex] NameIndex [Tier] ValueFormat ValueIndex
 data.Events:Invoke("Tracking.SourceRegistration", source, {
 	Color = function(currency, value, goal) return currency.rarity and data.COLORS.Item[currency.rarity] or data.COLORS.Item.Common end,
 	Data = ProcessCurrencies(Inspect.Currency.List()),
@@ -31,9 +57,12 @@ data.Events:Invoke("Tracking.SourceRegistration", source, {
 		Max = { 1.0, 0.0, 0.0 }
 	},
 	Description = "Currencies",
+	Icon = function(data) if icons[data.id] then return addon.identifier, icons[data.id] else return "Rift", Inspect.Currency.Detail(data.id).icon or Inspect.Item.Detail(data.id).icon end end,
 	IdIndex = "id",
 	MaxIndex = "max",
 	NameIndex = "name",
 	ValueFormat = "%d",
 	ValueIndex = "amount"
 })
+
+end

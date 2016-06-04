@@ -1,6 +1,24 @@
 local addon, data = ...
 local source = "item"
 
+--- TESTING: FIND ITEM ---
+do
+
+data.Modules:Named("Testing"):RegisterCommand("find-item <name>", "Find item on the player", function(name)
+	local lname = name:lower()
+	for k, v in pairs(Inspect.Item.Detail(Utility.Item.Slot.All())) do
+		if v.name:lower() == lname then
+			local t = table.pack(Utility.Item.Slot.Parse(k))
+			table.insert(t, v)
+			dump(unpack(t))
+		end
+	end
+end)
+
+end
+--- TRACKING ---
+do
+
 local history = {}
 local items = {}
 
@@ -13,9 +31,9 @@ Command.Event.Attach(Event.Addon.Startup.End, function()
 		if not k then
 			-- no more bags. stop
 			return false
-		elseif Inspect.Time.Frame() - framestart > 5 then
+		elseif Inspect.Time.Frame() - framestart > 10 then
 			-- too much time has passed (!?)
-			data.Modules["Tracking"]:Error("Failed to load inventory items")
+			data.Modules:Named("Tracking"):Error("Failed to load inventory items")
 			return false
 		elseif not Inspect.Item.List(k) then
 			-- bag does not exist (!?)
@@ -36,15 +54,15 @@ Command.Event.Attach(Event.Addon.Startup.End, function()
 		data.Events:Invoke("Tracking.SourceUpdate", source, ProcessSlots(Utility.Item.Slot.Inventory(b)))
 		return true
 	end, "Additional.Tracking.Item:System.Update.Begin")
-end, "Additional.Tracking.Item:Addon.Startup.End")
+end, "Additional.Plugins.Item:Tracking:Addon.Startup.End")
 
 Command.Event.Attach(Event.Item.Slot, function(h, updates)
 	data.Events:Invoke("Tracking.SourceUpdate", source, ProcessSlots(updates))
-end, "Additional.Tracking.Item:Item.Slot")
+end, "Additional.Plugins.Item:Tracking:Item.Slot")
 
 Command.Event.Attach(Event.Item.Update, function(h, updates)
 	data.Events:Invoke("Tracking.SourceUpdate", source, ProcessSlots(updates))
-end, "Additional.Tracking.Item:Item.Update")
+end, "Additional.Plugins.Item:Tracking:Item.Update")
 
 ProcessSlots = function(slots)
 	if isstring(slots) then
@@ -78,6 +96,7 @@ ProcessSlots = function(slots)
 				items[type] = {
 					count = count,
 					name = details[k].name,
+					icon = details[k].icon,
 					rarity = details[k].rarity,
 					type = type
 				}
@@ -103,8 +122,11 @@ data.Events:Invoke("Tracking.SourceRegistration", source, {
 		Goal = { 0.75, 0.5, 0.0 }
 	},
 	Description = "Inventory items",
+	Icon = function(data) return "Rift", items[data.id].icon end,
 	IdIndex = "type",
 	NameIndex = "name",
 	ValueFormat = "%d",
 	ValueIndex = "count"
 })
+
+end
