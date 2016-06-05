@@ -28,7 +28,9 @@ RunOnStartup = {
 	-- PLUGINS
 	"Plugins/Currency.lua",
 	"Plugins/Item.lua",
-	"Plugins/Notoriety.lua"
+	"Plugins/Notoriety.lua",
+
+	"Debug.lua"
 }
 
 SavedVariables = {

@@ -53,7 +53,6 @@ end
 do
 
 local overlay = UI.CreateFrame("Frame", "Additional.Testing.overlay", data.UI.Context)
-OVERLAY = overlay
 overlay:SetBackgroundColor(1.0, 1.0, 1.0, 0.5)
 overlay:SetVisible(false)
 

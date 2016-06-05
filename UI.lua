@@ -12,7 +12,6 @@ local path_outline = {
 }
 
 data.UI = {}
-ADDUI = data.UI
 
 data.UI.Context = UI.CreateContext(addon.identifier)
 
