@@ -2,7 +2,7 @@ Identifier = "Additional"
 Name = "Additional"
 NameShort = "Additional"
 Description = ""
-Version = "1.0"
+Version = "1.1"
 
 Author = "Kuraeno@Hailol"
 Email = "mail@requinix.net"

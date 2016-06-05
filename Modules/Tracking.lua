@@ -168,29 +168,28 @@ AddBar = function(bardata)
 
 	if not b.Frame then
 		b.Frame = UI.CreateFrame("Frame", "Additional.Tracking.bars#" .. framecounter .. ".Frame", data.UI.Context)
-		b.Frame:SetBackgroundColor(0.75, 0.75, 0.0)
+		b.Frame:SetBackgroundColor(0.0, 0.0, 0.0)
 		b.Frame:SetHeight(22)
 	end
 	b.Frame:SetVisible(true)
 
-	if not b.BarContainer then
-		b.BarContainer = UI.CreateFrame("Frame", "Additional.Tracking.bars#" .. framecounter .. ".BarContainer", b.Frame)
-		b.BarContainer:SetBackgroundColor(0.0, 0.0, 0.0)
-		b.BarContainer:SetLayer(1)
-		b.BarContainer:SetPoint("TOPLEFT", b.Frame, "TOPLEFT", 1, 1)
-		b.BarContainer:SetPoint("BOTTOMRIGHT", b.Frame, "BOTTOMRIGHT", -1, -1)
+	if not b.Bar then
+		b.Bar = UI.CreateFrame("Canvas", "Additional.Tracking.bars#" .. framecounter .. ".Bar", b.Frame)
+		b.Bar:SetBackgroundColor(0.0, 0.0, 0.0, 1.0)
+		b.Bar:SetLayer(1)
+		b.Bar:SetPoint("TOPLEFT", b.Frame, "TOPLEFT")
 	end
 
-	if not b.Bar then
-		b.Bar = UI.CreateFrame("Frame", "Additional.Tracking.bars#" .. framecounter .. ".Bar", b.BarContainer)
-		b.Bar:SetLayer(1)
-		b.Bar:SetPoint("TOPLEFT", b.BarContainer, "TOPLEFT", 1, 1)
+	if not b.BarMask then
+		b.BarMask = UI.CreateFrame("Canvas", "Additional.Tracking.bars#" .. framecounter .. ".BarMask", b.Frame)
+		b.BarMask:SetAllPoints(b.Frame)
+		b.BarMask:SetLayer(2)
 	end
 
 	if not b.Icon then
 		b.Icon = UI.CreateFrame("Texture", "Additional.Tracking.bars#" .. framecounter .. ".Icon", b.Frame)
-		b.Icon:SetPoint("TOPRIGHT", b.BarContainer, "TOPLEFT", -2, 0)
-		b.Icon:SetPoint("BOTTOMRIGHT", b.BarContainer, "BOTTOMLEFT", -2, 0)
+		b.Icon:SetPoint("TOPRIGHT", b.Frame, "TOPLEFT", -2, 0)
+		b.Icon:SetPoint("BOTTOMRIGHT", b.Frame, "BOTTOMLEFT", -2, 0)
 		b.Icon:SetWidth(b.Icon:GetHeight())
 	end
 	if s.Icon then
@@ -210,7 +209,7 @@ AddBar = function(bardata)
 	b.Label:SetText(bardata.name)
 
 	if not b.Progress then
-		b.Progress = UI.CreateFrame("Text", "Additional.Tracking.bars#" .. framecounter .. ".Progress", b.BarContainer)
+		b.Progress = UI.CreateFrame("Text", "Additional.Tracking.bars#" .. framecounter .. ".Progress", b.Frame)
 		b.Progress:SetEffectGlow({ strength = 4 })
 		b.Progress:SetFontColor(1.0, 1.0, 1.0)
 		b.Progress:SetFontSize(12)
@@ -218,9 +217,9 @@ AddBar = function(bardata)
 	end
 	b.Progress:ClearAll()
 	if s.Tier then
-		b.Progress:SetPoint("CENTERRIGHT", b.BarContainer, "CENTERRIGHT", -2, 0)
+		b.Progress:SetPoint("CENTERRIGHT", b.Frame, "CENTERRIGHT", -2, 0)
 	else
-		b.Progress:SetPoint("CENTER", b.BarContainer, "CENTER", -2, 0)
+		b.Progress:SetPoint("CENTER", b.Frame, "CENTER", -2, 0)
 	end
 
 	if not b.Tier then
@@ -348,18 +347,25 @@ ShowBar = function(bar)
 		progress = string.format(source.ValueFormat, value)
 	end
 
-	bar.Bar:SetBackgroundColor(unpack(color))
-	bar.Bar:SetPoint("BOTTOMRIGHT", bar.BarContainer, percent, 1.0, 0, -1)
+	bar.Bar:SetPoint("BOTTOMRIGHT", bar.Frame, percent, 1.0)
 	bar.Bar:SetVisible(percent > 0.005)
+	data.UI.FillGradientLinear(bar.Bar, { x = 0, y = 1 },
+		{ color = color, position = 0 },
+		{ color = data.UI.LightenColor(color), position = 40 },
+		{ color = data.UI.LightenColor(color), position = 60 },
+		{ color = color, position = 100 }
+	)
+	data.UI.DrawOutline(bar.BarMask, data.UI.DarkenColor(color), 1, {})
+
 	bar.Progress:SetText(progress)
 	bar.Progress:SetVisible(not tier or value < max)
 
 	bar.Tier:SetText(tier or "")
 	if tier then
 		if value == max then
-			bar.Tier:SetPoint("CENTER", bar.BarContainer, "CENTER")
+			bar.Tier:SetPoint("CENTER", bar.Frame, "CENTER")
 		else
-			bar.Tier:SetPoint("CENTERLEFT", bar.BarContainer, "CENTERLEFT", 2, 0)
+			bar.Tier:SetPoint("CENTERLEFT", bar.Frame, "CENTERLEFT", 2, 0)
 		end
 	end
 end

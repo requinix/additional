@@ -34,7 +34,6 @@ TESTING
 TRACKING
 
 * Bug: The item icons that "move" into bags when picking up new items are covered up by tracking bars
-* [v1.1] Change: Use Canvas for progress bars
 * Change: Allow tracking of unknown stuff by putting them in the pending queue
 * Change: Show tracking bars for pending stuff (without progress information)
 * New: Support for quest items
