@@ -9,7 +9,7 @@ local pending = {}
 local reusable = {}
 local sources = { --[[
 	source = {
-		-- {Color and/or DefaultColors} Data Description [Icon] IdIndex [MaxIndex] NameIndex [Tier] ValueFormat ValueIndex
+		-- {Color and/or DefaultColors} Data Description [Icon] IdIndex [MaxIndex] NameIndex [Tier] {Value and/or ValueIndex} ValueFormat
 		Color = function(data, value, goal, max)
 			return { R, G, B }
 		end,
@@ -29,7 +29,10 @@ local sources = { --[[
 		Tier = function(value)
 			return "tier", adjusted value, tier max
 		end,
-		ValueFormat = "index",
+		Value = function(data)
+			return value
+		end,
+		ValueFormat = "string",
 		ValueIndex = "index"
 	}
 ]] }
@@ -310,7 +313,7 @@ ShowBar = function(bar)
 	local sourcedata = source.Data[bar.data.id]
 
 	local tier
-	local value = type(source.ValueIndex) == "function" and source.ValueIndex(sourcedata) or sourcedata[source.ValueIndex]
+	local value = source.Value and source.Value(sourcedata) or sourcedata[source.ValueIndex]
 	local max
 
 	if source.Tier then
@@ -343,19 +346,19 @@ ShowBar = function(bar)
 		progress = string.format(source.ValueFormat .. " / " .. source.ValueFormat, value, max)
 	else
 		color = config.Colors[bar.data.type].Normal or source.Color(sourcedata, value)
-		percent = 1.0
+		percent = value > 0 and 1.0 or 0.0
 		progress = string.format(source.ValueFormat, value)
 	end
 
 	bar.Bar:SetPoint("BOTTOMRIGHT", bar.Frame, percent, 1.0)
 	bar.Bar:SetVisible(percent > 0.005)
 	data.UI.FillGradientLinear(bar.Bar, { x = 0, y = 1 },
-		{ color = color, position = 0 },
-		{ color = data.UI.LightenColor(color), position = 40 },
-		{ color = data.UI.LightenColor(color), position = 60 },
-		{ color = color, position = 100 }
+		{ color = data.UI.DarkenColor(color), position = 0 },
+		{ color = color, position = 40 },
+		{ color = color, position = 60 },
+		{ color = data.UI.DarkenColor(color), position = 100 }
 	)
-	data.UI.DrawOutline(bar.BarMask, data.UI.DarkenColor(color), 1, {})
+	data.UI.DrawOutline(bar.BarMask, color, 1, {})
 
 	bar.Progress:SetText(progress)
 	bar.Progress:SetVisible(not tier or value < max)

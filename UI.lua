@@ -15,18 +15,72 @@ data.UI = {}
 
 data.UI.Context = UI.CreateContext(addon.identifier)
 
-data.UI.DarkenColor = function(color, factor)
+--[=[
+	rgba BlendColor(rgba color1, rgba color2, number ratio)
+	Blend two colors together
+
+	Parameters
+		rgba color1  - first RGBA color table
+		rgba color2  - second RGBA color table
+		number ratio - mixture ratio; 0.0 = fully color1, 0.5 = blend, 1.0 = fully color2 (default 0.5)
+
+	Returns
+		rgba         - RGBA color table using the same keys as color1 and including extra keys from color2
+]=]
+data.UI.BlendColor = function(color1, color2, ratio)
+	local blend = { "r", "g", "b", "a", r = 1, g = 2, b = 3, a = 4 }
 	local t = {}
-	local f = factor or 0.5
-	t.r = color.r and color.r * f or nil
-	t[1] = color[1] and color[1] * f or nil
-	t.g = color.g and color.g * f or nil
-	t[2] = color[2] and color[2] * f or nil
-	t.b = color.b and color.b * f or nil
-	t[3] = color[3] and color[3] * f or nil
+	for k, v in pairs(color1) do
+		if blend[k] and color2[k] then
+			t[k] = v + ratio * (color2[k] - v)
+		elseif blend[k] and color2[blend[k]] then
+			t[k] = v + ratio * (color2[blend[k]] - v)
+		else
+			t[k] = v
+		end
+	end
+	for k, v in pairs(color2) do
+		if not t[k] and not (blend[k] and t[blend[k]]) then
+			t[k] = v
+		end
+	end
 	return t
 end
 
+--[=[
+	rgb DarkenColor(rgb color [, percent factor ])
+	Darken a color by moving each component factor% towards black
+
+	component = component - (component * factor)
+
+	Parameters
+		rgb color      - RGB color table, extra keys preserved
+		percent factor - percentage to move towards black; 0.0 = unchanged, 1.0 = black (default 0.33)
+
+	Returns
+		rgb            - RGB color table using the same keys as the original table
+]=]
+data.UI.DarkenColor = function(color, factor)
+	local alter = { 1, 1, 1, r = 1, g = 1, b = 1 }
+	local f = factor and (1 - factor) or 0.67
+
+	local t = {}
+	for k, v in pairs(color) do
+		t[v] = alter[k] and v * f or v
+	end
+	return t
+end
+
+--[=[
+	DrawOutline(canvas target [, rgba color [, number width [, rgba interior ] ] ])
+	Draw an outline around a rectangular canvas
+
+	Parameters
+		canvas target - canvas to draw on
+		rgba color    - RGBA color table (default black opaque)
+		number width  - width of outline (default 1.0)
+		rgba interior - RGBA color table (default black transparency)
+]=]
 data.UI.DrawOutline = function(target, color, width, interior)
 	local path = path_outline
 	local fill = interior and {
@@ -47,6 +101,19 @@ data.UI.DrawOutline = function(target, color, width, interior)
 	target:SetShape(path, fill, stroke)
 end
 
+--[=[
+	FillGradientLinear(canvas target, table direction, table start, [ table position... ])
+	Fill a rectangular canvas with a linear gradient fill
+
+	direction can be indicated as:
+	- a vector (table with x,y keys)
+
+	Parameters
+		canvas target     - canvas to draw on
+		table direction   - direction of gradient
+		table start       - rgba color table with optional alpha (default opaque) and position (default 0)
+		table position... - rgba color tables with optional alpha (default previous alpha) and position (default previous position + 1)
+]=]
 data.UI.FillGradientLinear = function(target, direction, start, ...)
 	local path = path_outline
 
@@ -108,39 +175,26 @@ data.UI.FillGradientLinear = function(target, direction, start, ...)
 	target:SetShape(path, fill, nil)
 end
 
+--[=[
+	rgb LightenColor(rgb color [, percent factor ])
+	Lighten a color by moving each component factor% closer to white
+
+	component = component + factor * (1 - component)
+
+	Parameters
+		rgb color      - RGB color table, extra keys preserved
+		percent factor - percentage to move closer to white; 0.0 = unchanged, 1.0 = white (default 0.33)
+
+	Returns
+		rgb            - RGB color table using the same keys as the original table
+]=]
 data.UI.LightenColor = function(color, factor)
+	local alter = { 1, 1, 1, r = 1, g = 1, b = 1 }
+	local f = factor or 0.33
+
 	local t = {}
-	local f = factor and 1 - factor or 0.5
-	t.r = color.r and 1 - ((1 - color.r) * f) or nil
-	t[1] = color[1] and 1 - ((1 - color[1]) * f) or nil
-	t.g = color.g and 1 - ((1 - color.g) * f) or nil
-	t[2] = color[2] and 1 - ((1 - color[2]) * f) or nil
-	t.b = color.b and 1 - ((1 - color.b) * f) or nil
-	t[3] = color[3] and 1 - ((1 - color[3]) * f) or nil
+	for k, v in pairs(color) do
+		t[v] = alter[k] and v + f * (1 - v) or v
+	end
 	return t
-end
-
-data.UI.ReusableCreate = function(type, identifier, parent)
-	local frame = reusable[identifier] and table.remove(reusable[identifier].frames)
-	if frame then
-		return frame
-	end
-
-	reusable[identifier] = reusable[identifier] or { frames = {}, counter = 1 }
-	frame = UI.CreateFrame(type, identifier .. "#" .. reusable[identifier].counter, parent or data.UI.Context)
-	reusablestorage[frame] = identifier
-
-	reusable[identifier].counter = reusable[identifier].counter + 1
-
-	return frame
-end
-
-data.UI.ReusableDestroy = function(frame)
-	if frame.SetVisible then
-		frame:SetVisible(false)
-	end
-	if reusablestorage[frame] then
-		table.insert(reusable[reusablestorage[frame]].frames, frame)
-		reusablestorage[frame] = nil
-	end
 end

@@ -2,22 +2,68 @@ local addon, data = ...
 
 --- GLOBAL FUNCTIONS ---
 
-hexcolor2table = hexcolor2table or function(h)
-	return { math.floor(h / 65536) / 255, math.fmod(math.floor(h / 256), 256) / 255, math.fmod(h, 256) / 255 }
+--[=[
+	rgba hexcolor2table(mixed color [, number alpha ])
+	Convert a hex string or RGB decimal number to an RGBA color table
+
+	Parameters
+		mixed color  - color value as a string ("RRGGBB") or number (0xRRGGBB)
+		number alpha - alpha value, default 1.0
+
+	Returns
+		rgba         - RGBA color table
+]=]
+hexcolor2table = hexcolor2table or function(h, a)
+	h = type(v) == "string" and tonumber(h, 16) or tonumber(h)
+	return { math.floor(h / 65536) / 255, math.fmod(math.floor(h / 256), 256) / 255, math.fmod(h, 256) / 255, a or 1.0 }
 end
 
+--[=[
+	bool isnumber(mixed value)
+	Check if a value is a number
+
+	Parameters
+		mixed value - value
+
+	Returns
+		bool        - whether type(value) == "number"
+]=]
 isnumber = isnumber or function(v)
 	return type(v) == "number"
 end
 
+--[=[
+	bool isstring(mixed value)
+	Check if a value is a string
+
+	Parameters
+		mixed value - value
+
+	Returns
+		bool        - whether type(value) == "string"
+]=]
 isstring = isstring or function(v)
 	return type(v) == "string"
 end
 
+--[=[
+	bool istable(mixed value)
+	Check if a value is a table
+
+	Parameters
+		mixed value - value
+
+	Returns
+		bool        - whether type(value) == "table"
+]=]
 istable = istable or function(v)
 	return type(v) == "table"
 end
 
+--[=[
+	printf(format, args...)
+	Simple wrapper for print(string.format(...))
+]=]
 printf = printf or function(...)
 	print(string.format(...))
 end
@@ -27,6 +73,21 @@ end
 AdditionalCache = {}
 data.Cache = {}
 setmetatable(data.Cache, { __index = {
+	--[=[
+		Cache:Register(string module, function load, function save)
+		Register a module with the cache manager; saved data is global
+
+		Parameters
+			string module - module name
+			function load - cache load callback
+				Parameters
+					table static    - static cache data
+					table versioned - versioned cache data; will be {} after a version change
+			function save - cache save callback
+				Returns
+					table - static cache data
+					table - versioned cache data
+	]=]
 	Register = function(self, module, load, save)
 		data.Events:Register("Cache.Load", function(h, cache)
 			if not cache[module] then
@@ -48,6 +109,23 @@ setmetatable(data.Cache, { __index = {
 
 data.Commands = {}
 setmetatable(data.Commands, { __index = {
+	--[=[
+		any Commands:Call(string abbrev, string command [, mixed arg [, string args... ] ])
+		Call a registered command
+
+		Parameters
+			string abbrev  - module abbreviation
+			string command - command
+			mixed arg      - a table containing all arguments, or a string for the first argument
+			string args... - additional arguments
+
+		Returns
+			any            - returns what the command itself returns, if anything
+
+		Errors
+			- "Module not found: <abbrev>" if there are no commands registered for that module
+			- "Command not found: <command>" if there is no such command registered for that module
+	]=]
 	Call = function(self, abbrev, command, ...)
 		local first = (...)
 		if not self[abbrev] then
@@ -60,8 +138,18 @@ setmetatable(data.Commands, { __index = {
 			return self[abbrev][command].Callback(...)
 		end
 	end,
+	--[=[
+		table Commands.ParseArguments(string argument)
+		Parse an argument string
+
+		Parameters
+			string argument - full argument as provided by Rift; does not include slash command
+
+		Returns
+			table           - table of parsed arguments; [0] is the full string, [1]+ are the individual arguments
+	]=]
 	ParseArguments = function(argument)
-		local t = {}
+		local t = { [0] = argument }
 		local pos = 1
 		for term, qterm, p in argument:gmatch("%s*([^\"]*)\"([^\"]*)\"()") do
 			for w in term:gmatch("[^%s]+") do
@@ -75,6 +163,20 @@ setmetatable(data.Commands, { __index = {
 		end
 		return t
 	end,
+	--[=[
+		Commands:Register(string abbrev, string spec, string description, function callback)
+		Register a slash command for a module
+
+		Parameters
+			string abbrev      - module abbreviation
+			string spec        - string whose first word is used as the command; shown with the help command
+			string description - shown with the help command
+			function callback  - callback to handle the event
+				Parameters
+					mixed args... - any arguments that were given and as parsed by Commands.ParseArgument
+				Return
+					any           - any value to return through Commands.Call; meaningless for regular in-game slash commands
+	]=]
 	Register = function(self, abbrev, spec, description, callback)
 		if not self[abbrev] then
 			self[abbrev] = {}
@@ -89,11 +191,18 @@ setmetatable(data.Commands, { __index = {
 			self[abbrev][command] = { Callback = callback, Description = description, Spec = spec }
 		end
 	end,
-	ShowHelp = function(self, module)
-		for abbrev, commands in pairs(self) do
-			if not module or abbrev == module then
-				for command, info in pairs(commands) do
-					printf("/add.%s %s - %s", abbrev, info.Spec, info.Description)
+	--[=[
+		Commands:ShowHelp([string abbrev])
+		Show help for all commands or commands for the given module
+
+		Parameters
+			string abbrev - restrict output to commands for the given module
+	]=]
+	ShowHelp = function(self, abbrev)
+		for k, v in pairs(self) do
+			if not abbrev or k == abbrev then
+				for command, info in pairs(v) do
+					printf("/add.%s %s - %s", k, info.Spec, info.Description)
 				end
 			end
 		end
@@ -103,6 +212,19 @@ setmetatable(data.Commands, { __index = {
 AdditionalConfig = {}
 data.Config = {}
 setmetatable(data.Config, { __index = {
+	--[=[
+		Config:Register(string module, function load, function save)
+		Register a module with the configuration manager; saved data is per-account
+
+		Parameters
+			string module - module name
+			function load - config load callback
+				Parameters
+					table config - configuration data
+			function save - config save callback
+				Returns
+					table - configuration data
+	]=]
 	Register = function(self, module, load, save)
 		data.Events:Register("Config.Load", function(h, config)
 			load(config[module] or {})
@@ -115,6 +237,20 @@ setmetatable(data.Config, { __index = {
 
 data.Events = {}
 setmetatable(data.Events, { __index = {
+	--[=[
+		Events.AttachWhile(table event, function callback, string name)
+		Attach a callback to an event and auotmatically detach if the callback ever returns false, wrapping Command.Event.Attach/Detach
+
+		Parameters
+			table event       - event table as seen in the Event hierarchy
+			function callback - event handler
+				Parameters
+					table h - event handle
+					any     - event arguments
+				Returns
+					bool    - true to continue watching the event, false to detach the handler
+			string name       - event handler name
+	]=]
 	AttachWhile = function(event, callback, name)
 		local handler
 		handler = function(...)
@@ -122,13 +258,32 @@ setmetatable(data.Events, { __index = {
 				Command.Event.Detach(event, handler, name .. "<While>")
 			end
 		end
-		return Command.Event.Attach(event, handler, name .. "<While>")
+		Command.Event.Attach(event, handler, name .. "<While>")
 	end,
+	--[=[
+		Events:Invoke(string key [, any ])
+		Invoke an event, wrapping the function returned by Utility.Event.Create
+
+		Parameters
+			string key - event name
+			any        - event arguments, passed to registered listeners after the event handle
+	]=]
 	Invoke = function(self, key, ...)
 		if self[key] then
 			self[key].Invoke(...)
 		end
 	end,
+	--[=[
+		Events:Register(string key, function callback)
+		Register an event listener, wrapping Utility.Event.Create and Command.Event.Attach
+
+		Parameters
+			string key        - event name
+			function callback - event handler
+				Parameters
+					table h - event handle
+					any     - event parameters
+	]=]
 	Register = function(self, key, callback)
 		if not self[key] then
 			self[key] = { Count = 0 }
@@ -141,20 +296,49 @@ setmetatable(data.Events, { __index = {
 
 data.Modules = {}
 local modulesmt = { __index = {
+	--[=[
+		module:Error(string message)
+		Display an error message, prefixed by the module name
+
+		Parameters
+			string message - error message
+	]=]
 	Error = function(self, message)
 		Command.Console.Display("general", false, "<font color=\"#FF0000\">" .. self.name .. ": " .. message .. "</font>", true)
 	end,
+	--[=[
+		module:RegisterCache(function load, function save)
+		Wrapper for Cache:Register(module name, load, save)
+	]=]
 	RegisterCache = function(self, load, save)
 		data.Cache:Register(self.name, load, save)
 	end,
+	--[=[
+		module:RegisterCommand(string spec, string description, function callback)
+		Wrapper for Commands:Register(module abbreviation, spec, description, callback)
+	--]=]
 	RegisterCommand = function(self, spec, description, callback)
 		data.Commands:Register(self.abbrev, spec, description, callback)
 	end,
+	--[=[
+		module:RegisterConfig(function load, function save)
+		Wrapper for Config:Register(module name, load, save)
+	]=]
 	RegisterConfig = function(self, load, save)
 		data.Config:Register(self.name, load, save)
 	end
 }}
 setmetatable(data.Modules, { __index = {
+	--[=[
+		table Modules:Named(string name)
+		Get a module entry by name
+
+		Parameters
+			string name - module name
+
+		Returns
+			table       - module table
+	]=]
 	Named = function(self, name)
 		for k, v in pairs(self) do
 			if v.name == name then
@@ -163,6 +347,17 @@ setmetatable(data.Modules, { __index = {
 		end
 		return nil
 	end,
+	--[=[
+		table Modules:Register(string name, string abbrev)
+		Register a module
+
+		Parameters
+			string name   - module name
+			string abbrev - module abbreviation
+
+		Returns
+			table         - module table
+	]=]
 	Register = function(self, name, abbrev)
 		self[abbrev] = {
 			abbrev = abbrev,

@@ -1,5 +1,20 @@
 local addon, data = ...
 
+--[=[ PLAYER AVAILABILITY ---
+
+	bool data.PlayerAvailable - current state of player availability
+
+	PlayerAvailabilityChange(bool available, string id)
+	Signals a change in availability for the player
+
+	Parameters
+		bool available - whether the player is now fully available
+		string id      - player unit ID
+
+]=]
+
+do
+
 data.PlayerAvailable = false
 
 Command.Event.Attach(Event.Unit.Availability.Full, function(h, units)
@@ -23,3 +38,5 @@ Command.Event.Attach(Event.Unit.Availability.Partial, function(h, units)
 		end
 	end
 end, "Additional.InitEvents:Unit.Availability.Partial")
+
+end

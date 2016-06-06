@@ -23,15 +23,17 @@ local history = {}
 local items = {}
 
 Command.Event.Attach(Event.Addon.Startup.End, function()
-	local bags = Inspect.Item.Detail(Utility.Item.Slot.Inventory("bag"))
+	local bags = {}
 	local framestart = Inspect.Time.Frame()
 	data.Events.AttachWhile(Event.System.Update.Begin, function()
+		if not bags or not next(bags) then
+			bags = Inspect.Item.Detail(Utility.Item.Slot.Inventory("bag"))
+			return true
+		end
+
 		-- pick a bag
 		local k, v = next(bags)
-		if not k then
-			-- no more bags. stop
-			return false
-		elseif Inspect.Time.Frame() - framestart > 10 then
+		if Inspect.Time.Frame() - framestart > 10 then
 			-- too much time has passed (!?)
 			data.Modules:Named("Tracking"):Error("Failed to load inventory items")
 			return false
@@ -52,7 +54,7 @@ Command.Event.Attach(Event.Addon.Startup.End, function()
 		-- ready. dequeue bag and process slots
 		bags[k] = nil
 		data.Events:Invoke("Tracking.SourceUpdate", source, ProcessSlots(Utility.Item.Slot.Inventory(b)))
-		return true
+		return next(bags) ~= nil
 	end, "Additional.Tracking.Item:System.Update.Begin")
 end, "Additional.Plugins.Item:Tracking:Addon.Startup.End")
 

@@ -33,6 +33,7 @@ TESTING
 
 TRACKING
 
+* Bug: Inventory bags are not available on load?
 * Bug: The item icons that "move" into bags when picking up new items are covered up by tracking bars
 * Change: Allow tracking of unknown stuff by putting them in the pending queue
 * Change: Show tracking bars for pending stuff (without progress information)
@@ -52,5 +53,7 @@ CURRENCY
 * (Tracking) Change: Need a better icon for credits - can't find anything official
 
 ITEM
+
+* (Tracking) Change: Support combinable items (eg, 1 dream bolt <-> 99 dream ribbons)
 
 NOTORIETY
