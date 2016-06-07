@@ -1,4 +1,4 @@
-local addon, data = ...
+local addon, util = ...
 
 local reusable = {}
 local reusablestorage = {}
@@ -11,9 +11,9 @@ local path_outline = {
 	{ xProportional = 0.0, yProportional = 0.0 }
 }
 
-data.UI = {}
+util.UI = {}
 
-data.UI.Context = UI.CreateContext(addon.identifier)
+util.UI.Context = UI.CreateContext(addon.identifier)
 
 --[=[
 	rgba BlendColor(rgba color1, rgba color2, number ratio)
@@ -27,7 +27,7 @@ data.UI.Context = UI.CreateContext(addon.identifier)
 	Returns
 		rgba         - RGBA color table using the same keys as color1 and including extra keys from color2
 ]=]
-data.UI.BlendColor = function(color1, color2, ratio)
+function util.UI.BlendColors(color1, color2, ratio)
 	local blend = { "r", "g", "b", "a", r = 1, g = 2, b = 3, a = 4 }
 	local t = {}
 	for k, v in pairs(color1) do
@@ -60,13 +60,13 @@ end
 	Returns
 		rgb            - RGB color table using the same keys as the original table
 ]=]
-data.UI.DarkenColor = function(color, factor)
+function util.UI.DarkenColor(color, factor)
 	local alter = { 1, 1, 1, r = 1, g = 1, b = 1 }
 	local f = factor and (1 - factor) or 0.67
 
 	local t = {}
 	for k, v in pairs(color) do
-		t[v] = alter[k] and v * f or v
+		t[k] = alter[k] and v * f or v
 	end
 	return t
 end
@@ -81,7 +81,7 @@ end
 		number width  - width of outline (default 1.0)
 		rgba interior - RGBA color table (default black transparency)
 ]=]
-data.UI.DrawOutline = function(target, color, width, interior)
+function util.UI.DrawOutline(target, color, width, interior)
 	local path = path_outline
 	local fill = interior and {
 		type = "solid",
@@ -91,9 +91,9 @@ data.UI.DrawOutline = function(target, color, width, interior)
 		a = interior.a or interior[4] or 0.0
 	} or nil
 	local stroke = {
-		r = color.r or color[1] or color.color and (color.color.r or color.color[1]),
-		g = color.g or color[2] or color.color and (color.color.g or color.color[2]),
-		b = color.b or color[3] or color.color and (color.color.r or color.color[3]),
+		r = color.r or color[1],
+		g = color.g or color[2],
+		b = color.b or color[3],
 		a = color.a or color[4] or 1.0,
 		cap = "square",
 		thickness = width or 1.0
@@ -114,15 +114,15 @@ end
 		table start       - rgba color table with optional alpha (default opaque) and position (default 0)
 		table position... - rgba color tables with optional alpha (default previous alpha) and position (default previous position + 1)
 ]=]
-data.UI.FillGradientLinear = function(target, direction, start, ...)
+function util.UI.FillGradientLinear(target, direction, start, ...)
 	local path = path_outline
 
 	local fill = {
 		type = "gradientLinear",
 		color = { {
-			r = start.r or start[1] or start.color and (start.color.r or start.color[1]),
-			g = start.g or start[2] or start.color and (start.color.g or start.color[2]),
-			b = start.b or start[3] or start.color and (start.color.b or start.color[3]),
+			r = start.r or start[1],
+			g = start.g or start[2],
+			b = start.b or start[3],
 			a = start.a or start[4] or 1.0,
 			position = start.position or 0
 		} },
@@ -131,9 +131,9 @@ data.UI.FillGradientLinear = function(target, direction, start, ...)
 
 	for i, v in ipairs({ ... }) do
 		table.insert(fill.color, {
-			r = v.r or v[1] or v.color and (v.color.r or v.color[1]) or fill.color[#fill.color].r,
-			g = v.g or v[2] or v.color and (v.color.g or v.color[2]) or fill.color[#fill.color].g,
-			b = v.b or v[3] or v.color and (v.color.b or v.color[3]) or fill.color[#fill.color].b,
+			r = v.r or v[1] or fill.color[#fill.color].r,
+			g = v.g or v[2] or fill.color[#fill.color].g,
+			b = v.b or v[3] or fill.color[#fill.color].b,
 			a = v.a or v[4] or fill.color[#fill.color].a,
 			position = v.position or fill.color[#fill.color].position + 1
 		})
@@ -188,13 +188,13 @@ end
 	Returns
 		rgb            - RGB color table using the same keys as the original table
 ]=]
-data.UI.LightenColor = function(color, factor)
+function util.UI.LightenColor(color, factor)
 	local alter = { 1, 1, 1, r = 1, g = 1, b = 1 }
 	local f = factor or 0.33
 
 	local t = {}
 	for k, v in pairs(color) do
-		t[v] = alter[k] and v + f * (1 - v) or v
+		t[k] = alter[k] and v + f * (1 - v) or v
 	end
 	return t
 end

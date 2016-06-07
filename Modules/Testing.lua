@@ -1,5 +1,5 @@
-local addon, data = ...
-local module = data.Modules:Register("Testing", "test")
+local addon, util = ...
+local module = util.Modules:Register("Testing", "test")
 
 --- DIST TO TARGET ---
 do
@@ -52,7 +52,7 @@ end
 --- OVERLAY ---
 do
 
-local overlay = UI.CreateFrame("Frame", "Additional.Testing.overlay", data.UI.Context)
+local overlay = UI.CreateFrame("Frame", "Additional.Testing.overlay", util.UI.Context)
 overlay:SetBackgroundColor(1.0, 1.0, 1.0, 0.5)
 overlay:SetVisible(false)
 

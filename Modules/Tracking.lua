@@ -1,5 +1,5 @@
-local addon, data = ...
-local module = data.Modules:Register("Tracking", "track")
+local addon, util = ...
+local module = util.Modules:Register("Tracking", "track")
 
 local bars = {}
 local barroot
@@ -125,11 +125,11 @@ end)
 
 --- EVENTS ---
 
-data.Events:Register("Tracking.SourceRegistration", function(h, source, data)
+util.Events:Register("Tracking.SourceRegistration", function(h, source, data)
 	sources[source] = data
 end)
 
-data.Events:Register("Tracking.SourceUpdate", function(h, source, data)
+util.Events:Register("Tracking.SourceUpdate", function(h, source, data)
 	for k, v in pairs(data) do
 		sources[source].Data[k] = v
 		if bars[k] then
@@ -170,7 +170,7 @@ AddBar = function(bardata)
 	end
 
 	if not b.Frame then
-		b.Frame = UI.CreateFrame("Frame", "Additional.Tracking.bars#" .. framecounter .. ".Frame", data.UI.Context)
+		b.Frame = UI.CreateFrame("Frame", "Additional.Tracking.bars#" .. framecounter .. ".Frame", util.UI.Context)
 		b.Frame:SetBackgroundColor(0.0, 0.0, 0.0)
 		b.Frame:SetHeight(22)
 	end
@@ -352,13 +352,13 @@ ShowBar = function(bar)
 
 	bar.Bar:SetPoint("BOTTOMRIGHT", bar.Frame, percent, 1.0)
 	bar.Bar:SetVisible(percent > 0.005)
-	data.UI.FillGradientLinear(bar.Bar, { x = 0, y = 1 },
-		{ color = data.UI.DarkenColor(color), position = 0 },
-		{ color = color, position = 40 },
-		{ color = color, position = 60 },
-		{ color = data.UI.DarkenColor(color), position = 100 }
+	util.UI.FillGradientLinear(bar.Bar, { x = 0, y = 1 },
+		util.UI.BlendColors(util.UI.DarkenColor(color), { position = 0 }),
+		util.UI.BlendColors(color, { position = 33 } ),
+		util.UI.BlendColors(color, { position = 67 }),
+		util.UI.BlendColors(util.UI.DarkenColor(color), { position = 100 })
 	)
-	data.UI.DrawOutline(bar.BarMask, color, 1, {})
+	util.UI.DrawOutline(bar.BarMask, color, 1, {})
 
 	bar.Progress:SetText(progress)
 	bar.Progress:SetVisible(not tier or value < max)

@@ -1,5 +1,5 @@
-local addon, data = ...
-local module = data.Modules:Register("MiniMap", "mm")
+local addon, util = ...
+local module = util.Modules:Register("MiniMap", "mm")
 
 local cache = {}
 local config = {}
@@ -8,7 +8,7 @@ local learning = 0
 local maxx, maxz
 local minimap = UI.Native.MapMini
 local nodes = {}
-local overlay = UI.CreateFrame("Frame", "Additional.MiniMap.overlay", data.UI.Context)
+local overlay = UI.CreateFrame("Frame", "Additional.MiniMap.overlay", util.UI.Context)
 local player
 local playerlast = { false, false, false }
 local reusable = {}
@@ -228,7 +228,7 @@ UpdateNodes = function()
 	end
 end
 
-data.Events:Register("PlayerAvailabilityChange", function(h, available)
+util.Events:Register("PlayerAvailabilityChange", function(h, available)
 	if available then
 		player = Inspect.Unit.Detail("player")
 		playerlast[1], playerlast[2], playerlast[3] = player.coordX, player.coordY, player.coordZ

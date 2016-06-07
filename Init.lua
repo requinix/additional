@@ -1,22 +1,6 @@
-local addon, data = ...
+local addon, util = ...
 
 --- GLOBAL FUNCTIONS ---
-
---[=[
-	rgba hexcolor2table(mixed color [, number alpha ])
-	Convert a hex string or RGB decimal number to an RGBA color table
-
-	Parameters
-		mixed color  - color value as a string ("RRGGBB") or number (0xRRGGBB)
-		number alpha - alpha value, default 1.0
-
-	Returns
-		rgba         - RGBA color table
-]=]
-hexcolor2table = hexcolor2table or function(h, a)
-	h = type(v) == "string" and tonumber(h, 16) or tonumber(h)
-	return { math.floor(h / 65536) / 255, math.fmod(math.floor(h / 256), 256) / 255, math.fmod(h, 256) / 255, a or 1.0 }
-end
 
 --[=[
 	bool isnumber(mixed value)
@@ -71,8 +55,8 @@ end
 --- DATA HELPERS ---
 
 AdditionalCache = {}
-data.Cache = {}
-setmetatable(data.Cache, { __index = {
+util.Cache = {}
+setmetatable(util.Cache, { __index = {
 	--[=[
 		Cache:Register(string module, function load, function save)
 		Register a module with the cache manager; saved data is global
@@ -89,16 +73,16 @@ setmetatable(data.Cache, { __index = {
 					table - versioned cache data
 	]=]
 	Register = function(self, module, load, save)
-		data.Events:Register("Cache.Load", function(h, cache)
+		util.Events:Register("Cache.Load", function(h, cache)
 			if not cache[module] then
 				load({}, {})
-			elseif cache.Version ~= data.VERSION then
+			elseif cache.Version ~= util.Data.Version then
 				load(cache[module].Static or {}, {}, true)
 			else
 				load(cache[module].Static or {}, cache[module].Versioned or {}, false)
 			end
 		end)
-		data.Events:Register("Cache.Save", function(h, cache)
+		util.Events:Register("Cache.Save", function(h, cache)
 			local static, versioned = save()
 			if static or versioned then
 				cache[module] = { Static = static, Versioned = versioned }
@@ -107,8 +91,8 @@ setmetatable(data.Cache, { __index = {
 	end
 }})
 
-data.Commands = {}
-setmetatable(data.Commands, { __index = {
+util.Commands = {}
+setmetatable(util.Commands, { __index = {
 	--[=[
 		any Commands:Call(string abbrev, string command [, mixed arg [, string args... ] ])
 		Call a registered command
@@ -210,8 +194,8 @@ setmetatable(data.Commands, { __index = {
 }})
 
 AdditionalConfig = {}
-data.Config = {}
-setmetatable(data.Config, { __index = {
+util.Config = {}
+setmetatable(util.Config, { __index = {
 	--[=[
 		Config:Register(string module, function load, function save)
 		Register a module with the configuration manager; saved data is per-account
@@ -226,17 +210,17 @@ setmetatable(data.Config, { __index = {
 					table - configuration data
 	]=]
 	Register = function(self, module, load, save)
-		data.Events:Register("Config.Load", function(h, config)
+		util.Events:Register("Config.Load", function(h, config)
 			load(config[module] or {})
 		end)
-		data.Events:Register("Config.Save", function(h, config)
+		util.Events:Register("Config.Save", function(h, config)
 			config[module] = save()
 		end)
 	end
 }})
 
-data.Events = {}
-setmetatable(data.Events, { __index = {
+util.Events = {}
+setmetatable(util.Events, { __index = {
 	--[=[
 		Events.AttachWhile(table event, function callback, string name)
 		Attach a callback to an event and auotmatically detach if the callback ever returns false, wrapping Command.Event.Attach/Detach
@@ -294,7 +278,7 @@ setmetatable(data.Events, { __index = {
 	end
 }})
 
-data.Modules = {}
+util.Modules = {}
 local modulesmt = { __index = {
 	--[=[
 		module:Error(string message)
@@ -311,24 +295,24 @@ local modulesmt = { __index = {
 		Wrapper for Cache:Register(module name, load, save)
 	]=]
 	RegisterCache = function(self, load, save)
-		data.Cache:Register(self.name, load, save)
+		util.Cache:Register(self.name, load, save)
 	end,
 	--[=[
 		module:RegisterCommand(string spec, string description, function callback)
 		Wrapper for Commands:Register(module abbreviation, spec, description, callback)
 	--]=]
 	RegisterCommand = function(self, spec, description, callback)
-		data.Commands:Register(self.abbrev, spec, description, callback)
+		util.Commands:Register(self.abbrev, spec, description, callback)
 	end,
 	--[=[
 		module:RegisterConfig(function load, function save)
 		Wrapper for Config:Register(module name, load, save)
 	]=]
 	RegisterConfig = function(self, load, save)
-		data.Config:Register(self.name, load, save)
+		util.Config:Register(self.name, load, save)
 	end
 }}
-setmetatable(data.Modules, { __index = {
+setmetatable(util.Modules, { __index = {
 	--[=[
 		table Modules:Named(string name)
 		Get a module entry by name
@@ -370,9 +354,9 @@ setmetatable(data.Modules, { __index = {
 --- EVENT REGISTRATION ---
 
 Command.Event.Attach(Command.Slash.Register("add"), function(h, arguments)
-	local argv = data.Commands.ParseArguments(arguments)
+	local argv = util.Commands.ParseArguments(arguments)
 	if #argv == 0 or #argv >= 1 and argv[1] == "help" then
-		data.Commands:ShowHelp(argv[2])
+		util.Commands:ShowHelp(argv[2])
 	end
 end, "Additional.Init:/add")
 
@@ -384,16 +368,16 @@ end, "Additional.Init:Addon.Load.End")
 
 Command.Event.Attach(Event.Addon.SavedVariables.Load.End, function(h, identifier)
 	if identifier == addon.identifier then
-		data.Events:Invoke("Cache.Load", AdditionalCache)
-		data.Events:Invoke("Config.Load", AdditionalConfig)
+		util.Events:Invoke("Cache.Load", AdditionalCache)
+		util.Events:Invoke("Config.Load", AdditionalConfig)
 	end
 end, "Additional.Init:Addon.SavedVariables.Load.End")
 
 Command.Event.Attach(Event.Addon.SavedVariables.Save.Begin, function(h, identifier)
 	if identifier == addon.identifier then
-		AdditionalCache = { Version = data.VERSION }
-		data.Events:Invoke("Cache.Save", AdditionalCache)
+		AdditionalCache = { Version = util.Data.Version }
+		util.Events:Invoke("Cache.Save", AdditionalCache)
 		AdditionalConfig = {}
-		data.Events:Invoke("Config.Save", AdditionalConfig)
+		util.Events:Invoke("Config.Save", AdditionalConfig)
 	end
 end, "Additional.Init:Addon.SavedVariables.Save.Begin")

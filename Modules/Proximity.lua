@@ -1,14 +1,14 @@
-local addon, data = ...
-local module = data.Modules:Register("Proximity", "p")
+local addon, util = ...
+local module = util.Modules:Register("Proximity", "p")
 
 local player
 local playerlast = { 0, 0, 0 }
 local target
 local targetlast = { 0, 0, 0 }
-local targetoverlay = UI.CreateFrame("Text", "Additional.Proximity.targetoverlay", data.UI.Context)
+local targetoverlay = UI.CreateFrame("Text", "Additional.Proximity.targetoverlay", util.UI.Context)
 local targettarget
 local targettargetlast = { 0, 0, 0 }
-local targettargetoverlay = UI.CreateFrame("Text", "Additional.Proximity.targettargetoverlay", data.UI.Context)
+local targettargetoverlay = UI.CreateFrame("Text", "Additional.Proximity.targettargetoverlay", util.UI.Context)
 
 local DoUpdate
 
@@ -44,7 +44,7 @@ DoUpdate = function()
 	end
 end
 
-data.Events:Register("PlayerAvailabilityChange", function(h, available, id)
+util.Events:Register("PlayerAvailabilityChange", function(h, available, id)
 	if available then
 		player = Inspect.Unit.Detail(id)
 		playerlast[1], playerlast[2], playerlast[3] = player.coordX, player.coordY, player.coordZ

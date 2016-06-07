@@ -1,5 +1,5 @@
-local addon, data = ...
-local module = data.Modules:Register("Dimension", "dim")
+local addon, util = ...
+local module = util.Modules:Register("Dimension", "dim")
 
 local GetSelection
 
@@ -28,7 +28,7 @@ Command.Event.Attach(Event.Dimension.Layout.Remove, function(h, items)
 	end
 
 	if changed then
-		data.Events:Invoke("Dimension.SelectionChanged", selected, {}, removed, scount, oldscount)
+		util.Events:Invoke("Dimension.SelectionChanged", selected, {}, removed, scount, oldscount)
 	end
 end, "Additional.Dimension:Dimension.Layout.Remove")
 
@@ -53,7 +53,7 @@ Command.Event.Attach(Event.Dimension.Layout.Update, function(h, items)
 	end
 
 	if changed then
-		data.Events:Invoke("Dimension.SelectionChanged", selected, added, removed, scount, oldscount)
+		util.Events:Invoke("Dimension.SelectionChanged", selected, added, removed, scount, oldscount)
 	end
 end, "Additional.Dimension:Dimension.Layout.Update")
 
@@ -156,7 +156,7 @@ local changing = false
 local inuse = false
 
 local tooltip = {
-	frame = UI.CreateFrame("Frame", "Additional.Dimension.tooltip.frame", data.UI.Context)
+	frame = UI.CreateFrame("Frame", "Additional.Dimension.tooltip.frame", util.UI.Context)
 }
 
 tooltip.background = UI.CreateFrame("Texture", "Additional.Dimension.tooltip.background", tooltip.frame)
@@ -179,7 +179,7 @@ tooltip.text:SetFontSize(14)
 tooltip.framebody:SetPoint("TOPLEFT", tooltip.text, "TOPLEFT", -5, -5)
 tooltip.frame:SetPoint("TOPLEFT", tooltip.framebody, "TOPLEFT")
 
-data.Events:Register("Dimension.SelectionChanged", function(h, selection, added, removed, count, oldcount)
+util.Events:Register("Dimension.SelectionChanged", function(h, selection, added, removed, count, oldcount)
 	changing = true
 
 	if count ~= 1 and oldcount == 1 then

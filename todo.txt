@@ -1,6 +1,6 @@
 --- GENERAL ---
 
-* [v1.2] Change: Use pcall to avoid data loss due to errors
+* [v1.2] Change: Use Exception helpers to avoid data loss due to errors
 
 --- CORE ---
 
@@ -8,11 +8,15 @@ DATA
 
 EVENTS
 
+EXCEPTION
+
 THREAD
 
-* [v1.2] New: Coroutine helpers
+* New: Coroutine helper(s)
 
 UI
+
+* [v1.2] New: Menu helper
 
 --- MODULES ---
 
@@ -42,14 +46,16 @@ TRACKING
 * New: Countdown mode
 * New: Configuration
 * New: "Popup" notification when meeting goal
-* New: Click a bar to change or remove it
+* [v1.2] New: Right-click a bar to pull up a menu
+* [v1.2] New: Bar menu item to remove
+* New: Bar menu item to change
 
 --- PLUGINS ---
 
 CURRENCY
 
-* (Tracking) Bug: Items are also tracked through bank slots
-* (Tracking) New: Auto-track currencies that are near max
+* (Tracking) Bug? Items are also tracked through bank slots
+* [v1.2] (Tracking) New: Auto-track currencies that are near max
 * (Tracking) Change: Need a better icon for credits - can't find anything official
 
 ITEM

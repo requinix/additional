@@ -1,10 +1,10 @@
-local addon, data = ...
+local addon, util = ...
 local source = "notoriety"
 
 --- TESTING: FIND NOTORIETY ---
 do
 
-data.Modules:Named("Testing"):RegisterCommand("find-notoriety <name>", "Find faction notoriety on the player", function(name)
+util.Modules:Named("Testing"):RegisterCommand("find-notoriety <name>", "Find faction notoriety on the player", function(name)
 	local lname = name:lower()
 	for k, v in pairs(Inspect.Faction.Detail(Inspect.Faction.List())) do
 		if v.name:lower() == lname then
@@ -17,7 +17,7 @@ end
 --- TRACKING ---
 do
 
-data.Events:Invoke("Tracking.SourceRegistration", source, {
+util.Events:Invoke("Tracking.SourceRegistration", source, {
 	Data = Inspect.Faction.Detail(Inspect.Faction.List()),
 	DefaultColors = {
 		Normal = { 0.0, 0.66, 0.0 },
@@ -43,7 +43,7 @@ data.Events:Invoke("Tracking.SourceRegistration", source, {
 })
 
 Command.Event.Attach(Event.Faction.Notoriety, function(h, notoriety)
-	data.Events:Invoke("Tracking.SourceUpdate", source, Inspect.Faction.Detail(notoriety))
+	util.Events:Invoke("Tracking.SourceUpdate", source, Inspect.Faction.Detail(notoriety))
 end, "Additional.Plugins.Notoriety:Tracking:Faction.Notoriety")
 
 end

@@ -16,6 +16,7 @@ RunOnStartup = {
 	"Init.lua",
 	"Data.lua",
 	"Events.lua",
+	"Exception.lua",
 	"UI.lua",
 
 	-- MODULES

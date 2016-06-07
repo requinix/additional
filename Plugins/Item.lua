@@ -1,10 +1,10 @@
-local addon, data = ...
+local addon, util = ...
 local source = "item"
 
 --- TESTING: FIND ITEM ---
 do
 
-data.Modules:Named("Testing"):RegisterCommand("find-item <name>", "Find item on the player", function(name)
+util.Modules:Named("Testing"):RegisterCommand("find-item <name>", "Find item on the player", function(name)
 	local lname = name:lower()
 	for k, v in pairs(Inspect.Item.Detail(Utility.Item.Slot.All())) do
 		if v.name:lower() == lname then
@@ -25,7 +25,7 @@ local items = {}
 Command.Event.Attach(Event.Addon.Startup.End, function()
 	local bags = {}
 	local framestart = Inspect.Time.Frame()
-	data.Events.AttachWhile(Event.System.Update.Begin, function()
+	util.Events.AttachWhile(Event.System.Update.Begin, function()
 		if not bags or not next(bags) then
 			bags = Inspect.Item.Detail(Utility.Item.Slot.Inventory("bag"))
 			return true
@@ -35,7 +35,7 @@ Command.Event.Attach(Event.Addon.Startup.End, function()
 		local k, v = next(bags)
 		if Inspect.Time.Frame() - framestart > 10 then
 			-- too much time has passed (!?)
-			data.Modules:Named("Tracking"):Error("Failed to load inventory items")
+			util.Modules:Named("Tracking"):Error("Failed to load inventory items")
 			return false
 		elseif not Inspect.Item.List(k) then
 			-- bag does not exist (!?)
@@ -53,17 +53,17 @@ Command.Event.Attach(Event.Addon.Startup.End, function()
 
 		-- ready. dequeue bag and process slots
 		bags[k] = nil
-		data.Events:Invoke("Tracking.SourceUpdate", source, ProcessSlots(Utility.Item.Slot.Inventory(b)))
+		util.Events:Invoke("Tracking.SourceUpdate", source, ProcessSlots(Utility.Item.Slot.Inventory(b)))
 		return next(bags) ~= nil
 	end, "Additional.Tracking.Item:System.Update.Begin")
 end, "Additional.Plugins.Item:Tracking:Addon.Startup.End")
 
 Command.Event.Attach(Event.Item.Slot, function(h, updates)
-	data.Events:Invoke("Tracking.SourceUpdate", source, ProcessSlots(updates))
+	util.Events:Invoke("Tracking.SourceUpdate", source, ProcessSlots(updates))
 end, "Additional.Plugins.Item:Tracking:Item.Slot")
 
 Command.Event.Attach(Event.Item.Update, function(h, updates)
-	data.Events:Invoke("Tracking.SourceUpdate", source, ProcessSlots(updates))
+	util.Events:Invoke("Tracking.SourceUpdate", source, ProcessSlots(updates))
 end, "Additional.Plugins.Item:Tracking:Item.Update")
 
 ProcessSlots = function(slots)
@@ -117,8 +117,8 @@ ProcessSlots = function(slots)
 	return update
 end
 
-data.Events:Invoke("Tracking.SourceRegistration", source, {
-	Color = function(item, value, goal) return item.rarity and data.COLORS.Item[item.rarity] or data.COLORS.Item.Common end,
+util.Events:Invoke("Tracking.SourceRegistration", source, {
+	Color = function(item, value, goal) return item.rarity and util.Data.Colors.Item[item.rarity] or util.Data.Colors.Item.common end,
 	Data = {},
 	DefaultColors = {
 		Goal = { 0.75, 0.5, 0.0 }

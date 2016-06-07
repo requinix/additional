@@ -1,6 +1,4 @@
-Inventory items are only partially available on load: List(si) returns all bags, List(sibg) returns all bags, List(siX) returns an empty list, List(siX.Y) returns nil, Detail(siX.Y) returns nil. Given that there are no bags with 0 slots, eventually List(siX), when corresponding to a used bag slot, should return any number of slots and List(siX.Y) will return an ID or false. Note that the bags' Details include a .slots field. It appears that all bags' slots become available at the same time - at least in the same frame.
-
-Except for bags, inventory items are not available on load and no known event (including either Item event) fires after startup. LootCounter and Imhothar's Bags use a delay before doing an Inspect for items.
+(6/1) Inventory items are not available on load, List(si or sibg) return empty lists. No known event (including either Item event) fires after startup. LootCounter and Imothar's Bags use a delay before doing an Inspect for items.
 
 Resource node icons on the minimap are only present if the respective buffs are active. Nodes automatically appear when in range and disappear when out of range.
 
