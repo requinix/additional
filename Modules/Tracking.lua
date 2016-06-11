@@ -92,11 +92,13 @@ end)
 --- CONFIGURATION ---
 
 module:RegisterConfig(function(saved)
+	config.AutoTrackNearMax = saved.AutoTrackNearMax or 0.95
+
 	config.Colors = {}
 	for k, v in pairs(sources) do
 		if v.DefaultColors then
 			config.Colors[k] = {}
-			config.Colors[k].Normal = saved.Colors and saved.Colors[k] and saved.Colors[k].NormalZ or v.DefaultColors.Normal
+			config.Colors[k].Normal = saved.Colors and saved.Colors[k] and saved.Colors[k].Normal or v.DefaultColors.Normal
 			config.Colors[k].Goal = saved.Colors and saved.Colors[k] and saved.Colors[k].Goal or v.DefaultColors.Goal
 			config.Colors[k].Max = saved.Colors and saved.Colors[k] and saved.Colors[k].Max or v.DefaultColors.Max
 		end
@@ -113,9 +115,15 @@ module:RegisterConfig(function(saved)
 		end
 	end
 end, function()
-	local c = { Colors = config.Colors, Tracking = {} }
+	local c = {
+		AutoTrackNearMax = config.AutoTrackNearMax,
+		Colors = config.Colors,
+		Tracking = {}
+	}
 	for k, v in pairs(config.Tracking) do
-		c.Tracking[k] = v
+		if not v.autotrack then
+			c.Tracking[k] = v
+		end
 	end
 	for k, v in pairs(pending) do
 		c.Tracking[k] = v
@@ -127,15 +135,32 @@ end)
 
 util.Events:Register("Tracking.SourceRegistration", function(h, source, data)
 	sources[source] = data
+	util.Events:Invoke("Tracking.SourceUpdate", source, data.Data or {})
 end)
 
 util.Events:Register("Tracking.SourceUpdate", function(h, source, data)
+	local automax
 	for k, v in pairs(data) do
 		sources[source].Data[k] = v
 		if bars[k] then
 			ShowBar(bars[k])
 		elseif pending[k] and Track(source, k, pending[k].goal) then
 			pending[k] = nil
+		end
+
+		-- auto track near max
+		if config.AutoTrackNearMax and sources[source].MaxIndex then
+			automax = (sources[source].Value and sources[source].Value(v) or v[sources[source].ValueIndex]) >= config.AutoTrackNearMax * v[sources[source].MaxIndex]
+			if bars[k] and bars[k].autotrack and not automax then
+				RemoveBar(k)
+			elseif not bars[k] and automax then
+				AddBar({
+					autotrack = true,
+					id = k,
+					name = v[sources[source].NameIndex],
+					type = source
+				})
+			end
 		end
 	end
 end)
@@ -173,6 +198,12 @@ AddBar = function(bardata)
 		b.Frame = UI.CreateFrame("Frame", "Additional.Tracking.bars#" .. framecounter .. ".Frame", util.UI.Context)
 		b.Frame:SetBackgroundColor(0.0, 0.0, 0.0)
 		b.Frame:SetHeight(22)
+
+		b.Frame:EventAttach(Event.UI.Input.Mouse.Right.Click, function(h)
+			if h == b.Frame then
+				RemoveBar(b.data.id)
+			end
+		end, "Additional.Tracking.bars#" .. framecounter .. ".Frame:UI.Input.Mouse.Right.Click")
 	end
 	b.Frame:SetVisible(true)
 
@@ -205,7 +236,6 @@ AddBar = function(bardata)
 	if not b.Label then
 		b.Label = UI.CreateFrame("Text", "Additional.Tracking.bars#" .. framecounter .. ".Label", b.Frame)
 		b.Label:SetEffectGlow({ strength = 4 })
-		b.Label:SetFontColor(1.0, 1.0, 1.0)
 		b.Label:SetFontSize(12)
 	end
 	b.Label:SetPoint("CENTERRIGHT", s.Icon and b.Icon or b.Frame, "CENTERLEFT", -2, 0)
@@ -322,30 +352,36 @@ ShowBar = function(bar)
 		max = source.MaxIndex and (type(source.MaxIndex) == "function" and source.MaxIndex(sourcedata) or sourcedata[source.MaxIndex])
 	end
 
-	local color
+	local barcolor
+	local labelcolor
 	local percent
 	local progress
 
 	if bar.data.goal then
 		if value < bar.data.goal then
-			color = config.Colors[bar.data.type].Normal or source.Color(sourcedata, value, bar.data.goal)
+			barcolor = config.Colors[bar.data.type].Normal or source.Color(sourcedata, value, bar.data.goal)
+			labelcolor = util.Data.PaletteColors.White
 			percent = value / bar.data.goal
 			progress = string.format(source.ValueFormat .. " / " .. source.ValueFormat .. " (goal)", value, bar.data.goal)
 		elseif max then
-			color = config.Colors[bar.data.type][value < max and "Goal" or "Max"] or source.Color(sourcedata, value, bar.data.goal, max)
+			barcolor = config.Colors[bar.data.type][value < max and "Goal" or "Max"] or source.Color(sourcedata, value, bar.data.goal, max)
+			labelcolor = value < max and util.Data.PaletteColors.White or barcolor
 			percent = value / max
 			progress = string.format(source.ValueFormat .. " / " .. source.ValueFormat, value, max)
 		else
-			color = config.Colors[bar.data.type].Goal or source.Color(sourcedata, value, bar.data.goal)
+			barcolor = config.Colors[bar.data.type].Goal or source.Color(sourcedata, value, bar.data.goal)
+			labelcolor = barcolor
 			percent = 1.0
 			progress = string.format(source.ValueFormat .. " / " .. source.ValueFormat .. " (goal)", value, bar.data.goal)
 		end
 	elseif max then
-		color = config.Colors[bar.data.type][value >= max and "Max" or "Normal"] or source.Color(sourcedata, value, nil, max)
+		barcolor = config.Colors[bar.data.type][value < max and "Normal" or "Max"] or source.Color(sourcedata, value, nil, max)
+		labelcolor = value < max and util.Data.PaletteColors.White or barcolor
 		percent = math.min(value / max, 1.0)
 		progress = string.format(source.ValueFormat .. " / " .. source.ValueFormat, value, max)
 	else
-		color = config.Colors[bar.data.type].Normal or source.Color(sourcedata, value)
+		barcolor = config.Colors[bar.data.type].Normal or source.Color(sourcedata, value)
+		labelcolor = util.Data.PaletteColors.White
 		percent = value > 0 and 1.0 or 0.0
 		progress = string.format(source.ValueFormat, value)
 	end
@@ -353,12 +389,14 @@ ShowBar = function(bar)
 	bar.Bar:SetPoint("BOTTOMRIGHT", bar.Frame, percent, 1.0)
 	bar.Bar:SetVisible(percent > 0.005)
 	util.UI.FillGradientLinear(bar.Bar, { x = 0, y = 1 },
-		util.UI.BlendColors(util.UI.DarkenColor(color), { position = 0 }),
-		util.UI.BlendColors(color, { position = 33 } ),
-		util.UI.BlendColors(color, { position = 67 }),
-		util.UI.BlendColors(util.UI.DarkenColor(color), { position = 100 })
+		util.UI.BlendColors(util.UI.DarkenColor(barcolor), { position = 0 }),
+		util.UI.BlendColors(barcolor, { position = 33 } ),
+		util.UI.BlendColors(barcolor, { position = 67 }),
+		util.UI.BlendColors(util.UI.DarkenColor(barcolor), { position = 100 })
 	)
-	util.UI.DrawOutline(bar.BarMask, color, 1, {})
+	util.UI.DrawOutline(bar.BarMask, barcolor, 1, {})
+
+	bar.Label:SetFontColor(unpack(labelcolor))
 
 	bar.Progress:SetText(progress)
 	bar.Progress:SetVisible(not tier or value < max)
@@ -387,6 +425,7 @@ Track = function(type, key, goal)
 	config.Tracking[id].type = type
 
 	if bars[id] then
+		bars[id].autotrack = nil
 		ShowBar(bars[id])
 	else
 		AddBar(config.Tracking[id])

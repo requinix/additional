@@ -50,7 +50,7 @@ ProcessCurrencies = function(currencies)
 end
 
 util.Events:Invoke("Tracking.SourceRegistration", source, {
-	Color = function(currency, value, goal) return currency.rarity and util.Data.Colors.Item[currency.rarity] or util.Data.Colors.Item.common end,
+	Color = function(currency, value, goal) return currency.rarity and util.Data.RiftColors.Item[currency.rarity] or util.RiftData.Colors.Item.common end,
 	Data = ProcessCurrencies(Inspect.Currency.List()),
 	DefaultColors = {
 		Goal = { 0.75, 0.5, 0.0 },

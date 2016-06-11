@@ -1,7 +1,5 @@
 --- GENERAL ---
 
-* [v1.2] Change: Use Exception helpers to avoid data loss due to errors
-
 --- CORE ---
 
 DATA
@@ -16,7 +14,7 @@ THREAD
 
 UI
 
-* [v1.2] New: Menu helper
+* [v1.3] New: Menu helper
 
 --- MODULES ---
 
@@ -31,7 +29,7 @@ MINIMAP
 
 PROXIMITY
 
-* New: Proximity on group and raid members, for party and raid frames
+* New: Proximity on group and raid members, for party and raid frames (need to be in a party/raid lol)
 
 TESTING
 
@@ -46,9 +44,9 @@ TRACKING
 * New: Countdown mode
 * New: Configuration
 * New: "Popup" notification when meeting goal
-* [v1.2] New: Right-click a bar to pull up a menu
-* [v1.2] New: Bar menu item to remove
-* New: Bar menu item to change
+* [v1.3] New: Right-click a bar to pull up a menu
+* [v1.3] New: Bar menu item to remove
+* [v1.3] New: Bar menu item to change
 
 --- PLUGINS ---
 

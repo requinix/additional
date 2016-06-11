@@ -12,11 +12,17 @@ Dependencies = {
 }
 
 RunOnStartup = {
-	-- CORE
 	"Init.lua",
+
+	-- CORE
+	"Cache.lua",
+	"Commands.lua",
+	"Config.lua",
 	"Data.lua",
 	"Events.lua",
+	"EventsShared.lua",
 	"Exception.lua",
+	"Modules.lua",
 	"UI.lua",
 
 	-- MODULES

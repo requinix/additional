@@ -10,7 +10,7 @@ The X axis is east/west, the Y axis is up/down, and the Z axis is north/south.
 
 Currency and/or notoriety (I forget) is not immediately available on game load, but their events will fire containing all data. On a reload, information is immediately available and the events do not fire.
 
-Running Lua 5.1 (see _VERSION). Functions not available: dofile, loadfile
+Running Lua 5.1 (see _VERSION). Functions not available: dofile, loadfile, debug.* except traceback
 
 Preferred steps for (adding,) displaying, and (removing) information: (add items with constant configuration,) display with variable configuration and accurate data, (hide item, remove item by destroying data and setting UI elements aside for reuse).
 

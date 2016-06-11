@@ -118,7 +118,7 @@ ProcessSlots = function(slots)
 end
 
 util.Events:Invoke("Tracking.SourceRegistration", source, {
-	Color = function(item, value, goal) return item.rarity and util.Data.Colors.Item[item.rarity] or util.Data.Colors.Item.common end,
+	Color = function(item, value, goal) return item.rarity and util.Data.RiftColors.Item[item.rarity] or util.Data.RiftColors.Item.common end,
 	Data = {},
 	DefaultColors = {
 		Goal = { 0.75, 0.5, 0.0 }

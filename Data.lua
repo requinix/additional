@@ -2,8 +2,20 @@ local addon, util = ...
 
 util.Data = {}
 
+util.Data.PaletteColors = {
+	Black  = { 0.0000, 0.0000, 0.0000 }, -- #000000
+	Blue   = { 0.0000, 0.0000, 1.0000 }, -- #0000FF
+	Gray   = { 0.5333, 0.5333, 0.5333 }, -- #888888
+	Green  = { 0.0000, 0.5333, 0.0000 }, -- #008800
+	Orange = { 1.0000, 0.5333, 0.0000 }, -- #FF8800
+	Red    = { 1.0000, 1.0000, 0.0000 }, -- #FF0000
+	Purple = { 0.5333, 0.0000, 0.5333 }, -- #880088
+	White =  { 1.0000, 1.0000, 1.0000 }, -- #FFFFFF
+	Yellow = { 1.0000, 1.0000, 0.0000 }  -- #FFFF00
+}
+
 -- http://forums.riftgame.com/technical-discussions/addon-api-development/333518-official-addon-information-station.html#post4175070
-util.Data.Colors = {
+util.Data.RiftColors = {
 	Calling = {
 		cleric  = { 0.4667, 0.9373, 0.0000 }, -- #77EF00 green
 		mage    = { 0.7843, 0.3686, 1.0000 }, -- #C85EFF purple

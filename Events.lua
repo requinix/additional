@@ -1,42 +1,65 @@
 local addon, util = ...
 
---[=[ PLAYER AVAILABILITY ---
+--[=[
 
-	bool util.PlayerAvailable - current state of player availability
+class util.Events
 
-	event PlayerAvailabilityChange(bool available, string id)
-	Signals a change in availability for the player
+	void util.Events.AttachWhile(table event, function callback, string name)
+	Attach a callback to an event and auotmatically detach if the callback ever returns false, wrapping Command.Event.Attach/Detach
+		Parameters
+			table event       - event table as seen in the Event hierarchy
+			function callback - event handler
+				Parameters
+					table h - event handle
+					any     - event arguments
+				Returns
+					bool    - true to continue watching the event, false to detach the handler
+			string name       - event handler name
 
-	Parameters
-		bool available - whether the player is now fully available
-		string id      - player unit ID
+	void util.Events:Invoke(string key [, any... ])
+	Invoke an event, wrapping the function returned by Utility.Event.Create
+		Parameters
+			string key - event name
+			any        - event arguments, passed to registered listeners after the event handle
+
+	void util.Events:Register(string key, function callback)
+	Register an event listener, wrapping Utility.Event.Create and Command.Event.Attach
+		Parameters
+			string key        - event name
+			function callback - event handler
+				Parameters
+					table h - event handle
+					any     - event parameters
 
 ]=]
 
-do
-
-util.PlayerAvailable = false
-
-Command.Event.Attach(Event.Unit.Availability.Full, function(h, units)
-	for k, v in pairs(units) do
-		if v == "player" then
-			util.PlayerAvailable = true
-			util.Events:Invoke("PlayerAvailabilityChange", true, k)
-			break
+local function eventsAttachWhile(event, callback, name)
+	local handler
+	handler = function(...)
+		if not callback(...) then
+			Command.Event.Detach(event, handler, name .. "<While>")
 		end
 	end
-end, "Additional.InitEvents:Unit.Availability.Full")
-
-Command.Event.Attach(Event.Unit.Availability.Partial, function(h, units)
-	for k, v in pairs(units) do
-		if v == "player" then
-			if util.PlayerAvailable then
-				util.PlayerAvailable = false
-				util.Events:Invoke("PlayerAvailabilityChange", false, k)
-			end
-			break
-		end
-	end
-end, "Additional.InitEvents:Unit.Availability.Partial")
-
+	Command.Event.Attach(event, handler, name .. "<While>")
 end
+
+local function eventsInvoke(self, key, ...)
+	if self[key] then
+		self[key].Invoke(...)
+	end
+end
+
+local function eventsRegister(self, key, callback)
+	if not self[key] then
+		self[key] = { Count = 0 }
+		self[key].Invoke, self[key].Handle = Utility.Event.Create(addon.identifier, key)
+	end
+	self[key].Count = self[key].Count + 1
+	Command.Event.Attach(self[key].Handle, callback, string.format("%s.Event.%s:%d", addon.identifier, key, self[key].Count))
+end
+
+util.Events = setmetatable({}, { __index = {
+	AttachWhile = eventsAttachWhile,
+	Invoke = eventsInvoke,
+	Register = eventsRegister
+}})
