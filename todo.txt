@@ -1,63 +1,114 @@
---- GENERAL ---
+### GENERAL ###
 
---- CORE ---
+### CORE ###
 
-DATA
+--- DATA ---
 
-EVENTS
+--- EVENTS ---
 
-EXCEPTION
+--- EXCEPTION ---
 
-THREAD
+--- THREAD ---
 
-* New: Coroutine helper(s)
+* New: Coroutine helper
 
-UI
+--- UI ---
 
 * [v1.3] New: Menu helper
+* New: Button bar and buttons helper
 
---- MODULES ---
+### MODULES ###
 
-DIMENSION
+--- ASSISTANT ---
 
-* Change: Restore displayed tooltip for a single item if the tooltip is overwritten and then cleared
+--- DIMENSION ---
 
-MINIMAP
+--- MINIMAP ---
 
-* New: Artifacts (requires tracking vial or Patron buff)
-* New: Configuration
+* [v1.4] New: Configuration
+* Change: Move to plugin system
 
-PROXIMITY
+--- OVERSEER ---
+
+--- PROXIMITY ---
 
 * New: Proximity on group and raid members, for party and raid frames (need to be in a party/raid lol)
 
-TESTING
+--- TESTING ---
 
-TRACKING
+--- TRACKING ---
 
-* Bug: Inventory bags are not available on load?
 * Bug: The item icons that "move" into bags when picking up new items are covered up by tracking bars
+* Bug: Adding, removing, and adding bars sometimes creates a circular reference on pinned points
 * Change: Allow tracking of unknown stuff by putting them in the pending queue
 * Change: Show tracking bars for pending stuff (without progress information)
-* New: Support for quest items
-* New: Support for achievements
 * New: Countdown mode
-* New: Configuration
+* [v1.4] New: Configuration
 * New: "Popup" notification when meeting goal
 * [v1.3] New: Right-click a bar to pull up a menu
 * [v1.3] New: Bar menu item to remove
 * [v1.3] New: Bar menu item to change
 
---- PLUGINS ---
+### PLUGINS ###
+
+--- ASSISTANT ---
+
+ITEMS
+
+* New: Provide shortcut buttons for actions to combine items (eg, dream ribbons -> dream bolts)
+
+--- DIMENSION ---
+
+CLIPBOARD
+
+INSPECT
+
+TOOLTIP
+
+* Change: Restore tooltip if it is overwritten and then cleared
+
+--- MINIMAP ---
+
+ARTIFACTS
+
+* New: Artifacts (requires tracking vial or Patron buff)
+
+--- OVERSEER ---
+
+LOCAL
+
+* New: Show local players' classes/callings/roles, AFK/DC status
+
+WATCH
+
+* New: Watch for players or NPCs
+
+--- TESTING ---
 
 CURRENCY
 
-* (Tracking) Bug? Items are also tracked through bank slots
-* [v1.2] (Tracking) New: Auto-track currencies that are near max
-* (Tracking) Change: Need a better icon for credits - can't find anything official
+ITEM
+
+NOTORIETY
+
+--- TRACKING ---
+
+ACHIEVEMENT
+
+* New: Support for achievements
+
+CURRENCY
+
+* Bug? Items are also tracked through bank slots
+* [v1.2] New: Auto-track currencies that are near max
+* Change: Need a better icon for credits - can't find anything official
 
 ITEM
 
-* (Tracking) Change: Support combinable items (eg, 1 dream bolt <-> 99 dream ribbons)
+* Change: Support combinable items (eg, 1 dream bolt <-> 99 dream ribbons)
 
 NOTORIETY
+
+QUEST
+
+* New: Support for quest items

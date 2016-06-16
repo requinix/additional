@@ -1,26 +1,10 @@
 local addon, util = ...
-local source = "notoriety"
+local plugin = util.Plugins:Register("Tracking", "Notoriety")
 
---- TESTING: FIND NOTORIETY ---
-do
-
-util.Modules:Named("Testing"):RegisterCommand("find-notoriety <name>", "Find faction notoriety on the player", function(name)
-	local lname = name:lower()
-	for k, v in pairs(Inspect.Faction.Detail(Inspect.Faction.List())) do
-		if v.name:lower() == lname then
-			dump(v)
-		end
-	end
-end)
-
-end
---- TRACKING ---
-do
-
-util.Events:Invoke("Tracking.SourceRegistration", source, {
-	Data = Inspect.Faction.Detail(Inspect.Faction.List()),
+local source = {
+	Data = {},
 	DefaultColors = {
-		Normal = { 0.0, 0.66, 0.0 },
+		Normal = util.Data.PaletteColors.Green,
 		Goal = { 0.25, 0.25, 0.75 },
 		Max = { 0.0, 0.75, 0.25 }
 	},
@@ -40,10 +24,13 @@ util.Events:Invoke("Tracking.SourceRegistration", source, {
 		else                        return "Venerated", value - 241000, nil
 		end
 	end
-})
+}
 
-Command.Event.Attach(Event.Faction.Notoriety, function(h, notoriety)
-	util.Events:Invoke("Tracking.SourceUpdate", source, Inspect.Faction.Detail(notoriety))
-end, "Additional.Plugins.Notoriety:Tracking:Faction.Notoriety")
+plugin:OnEnable(function()
+	util.Events:Invoke("Tracking.SourceRegistration", "notoriety", source)
+	util.Events:Invoke("Tracking.SourceUpdate", "notoriety", Inspect.Faction.Detail(Inspect.Faction.List()))
+end)
 
-end
+plugin:EventAttach(Event.Faction.Notoriety, function(h, notoriety)
+	util.Events:Invoke("Tracking.SourceUpdate", "notoriety", Inspect.Faction.Detail(notoriety))
+end, "Faction.Notoriety")

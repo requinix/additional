@@ -88,6 +88,7 @@ local function commandRegister(self, abbrev, spec, description, callback)
 end
 
 local function commandShowHelp(self, abbrev)
+	print("Commands:")
 	for k, v in pairs(self) do
 		if not abbrev or k == abbrev then
 			for command, info in pairs(v) do

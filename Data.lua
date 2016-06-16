@@ -48,4 +48,17 @@ util.Data.RiftColors = {
 	}
 }
 
+util.Data.RiftLookup = {
+	Rarity = {
+		trash    = 1, "trash",
+		sellable = 1,
+		common   = 2, "common",
+		uncommon = 3, "uncommon",
+		rare     = 4, "rare",
+		epic     = 5, "epic",
+		relic    = 6, "relic",
+		quest    = 7, "quest"
+	}
+}
+
 util.Data.Version = Inspect.System.Version().internal

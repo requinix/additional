@@ -24,6 +24,8 @@ local ShowNode
 local TestNode
 local UpdateNodes
 
+overlay:SetVisible(false)
+
 module:RegisterCache(function(static, versioned)
 	cache.NodeTypes = static.NodeTypes or {}
 	cache.NodeTypeMap = versioned.NodeTypeMap or { Fish = false, Ore = false, Plant = false, Wood = false }
@@ -228,35 +230,50 @@ UpdateNodes = function()
 	end
 end
 
-util.Events:Register("PlayerAvailabilityChange", function(h, available)
+module:EventAttach(Event.Map.Add, function(h, elements)
+	for k, v in pairs(Inspect.Map.Detail(elements)) do
+		if TestNode(v) then
+			AddNode(v)
+		end
+	end
+end, "Map.Add")
+
+module:EventAttach(Event.Map.Remove, function(h, elements)
+	for k in pairs(elements) do
+		RemoveNode(k)
+	end
+end, "Map.Remove")
+
+module:EventAttach(Event.Unit.Detail.Coord, function(h, x, y, z)
+	if player and x[player.id] then
+		playerlast[1], playerlast[2], playerlast[3] = x[player.id], y[player.id], z[player.id]
+		UpdateNodes()
+	end
+end, "Unit.Detail.Coord")
+
+module:OnDisable(function()
+	overlay:SetVisible(false)
+
+	for k in pairs(nodes) do
+		RemoveNode(k)
+	end
+end)
+
+module:OnEnable(function()
+	overlay:SetVisible(true)
+	Refresh()
+
+	player = util.Shared.PlayerAvailability.Test()
+	if player then
+		playerlast[1], playerlast[2], playerlast[3] = player.coordX, player.coordY, player.coordZ
+		Refresh()
+	end
+end)
+
+module:RegisterEvent("Shared.PlayerAvailability.Change", function(h, available)
 	if available then
 		player = Inspect.Unit.Detail("player")
 		playerlast[1], playerlast[2], playerlast[3] = player.coordX, player.coordY, player.coordZ
 	end
 	UpdateNodes()
 end)
-
-Command.Event.Attach(Event.Addon.Startup.End, function()
-	Refresh()
-end, "Additional.MiniMap:Addon.Startup.End")
-
-Command.Event.Attach(Event.Map.Add, function(h, elements)
-	for k, v in pairs(Inspect.Map.Detail(elements)) do
-		if TestNode(v) then
-			AddNode(v)
-		end
-	end
-end, "Additional.MiniMap:Map.Add")
-
-Command.Event.Attach(Event.Map.Remove, function(h, elements)
-	for k in pairs(elements) do
-		RemoveNode(k)
-	end
-end, "Additional.MiniMap:Map.Remove")
-
-Command.Event.Attach(Event.Unit.Detail.Coord, function(h, x, y, z)
-	if player and x[player.id] then
-		playerlast[1], playerlast[2], playerlast[3] = x[player.id], y[player.id], z[player.id]
-		UpdateNodes()
-	end
-end, "Additional.MiniMap:Unit.Detail.Coord")

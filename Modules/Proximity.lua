@@ -11,6 +11,8 @@ local targettargetlast = { 0, 0, 0 }
 local targettargetoverlay = UI.CreateFrame("Text", "Additional.Proximity.targettargetoverlay", util.UI.Context)
 
 local DoUpdate
+local PlayerTargetChanged
+local PlayerTargetTargetChanged
 
 targetoverlay:SetFontSize(12)
 targetoverlay:SetEffectGlow({ strength = 3 })
@@ -44,33 +46,31 @@ DoUpdate = function()
 	end
 end
 
-util.Events:Register("PlayerAvailabilityChange", function(h, available, id)
-	if available then
-		player = Inspect.Unit.Detail(id)
-		playerlast[1], playerlast[2], playerlast[3] = player.coordX, player.coordY, player.coordZ
-	else
-		player = nil
-	end
-	DoUpdate()
-end)
-
-Command.Event.Attach(Library.LibUnitChange.Register("player.target"), function()
+PlayerTargetChanged = function()
 	target = Inspect.Unit.Detail("player.target")
 	if target then
 		targetlast[1], targetlast[2], targetlast[3] = target.coordX, target.coordY, target.coordZ
 	end
-	DoUpdate()
-end, "Additional.Proximity:player.target")
+end
 
-Command.Event.Attach(Library.LibUnitChange.Register("player.target.target"), function()
+PlayerTargetTargetChanged = function()
 	targettarget = Inspect.Unit.Detail("player.target.target")
 	if targettarget then
 		targettargetlast[1], targettargetlast[2], targettargetlast[3] = targettarget.coordX, targettarget.coordY, targettarget.coordZ
 	end
-	DoUpdate()
-end, "Additional.Proximity:player.target.target")
+end
 
-Command.Event.Attach(Event.Unit.Detail.Coord, function(h, xs, ys, zs)
+module:EventAttach(Library.LibUnitChange.Register("player.target"), function()
+	PlayerTargetChanged()
+	DoUpdate()
+end, "LibUnitChange.Register:player.target")
+
+module:EventAttach(Library.LibUnitChange.Register("player.target.target"), function()
+	PlayerTargetTargetChanged()
+	DoUpdate()
+end, "LibUnitChange.Register:player.target.target")
+
+module:EventAttach(Event.Unit.Detail.Coord, function(h, xs, ys, zs)
 	local update = false
 	if player and xs[player.id] then
 		playerlast[1], playerlast[2], playerlast[3] = xs[player.id], ys[player.id], zs[player.id]
@@ -87,4 +87,29 @@ Command.Event.Attach(Event.Unit.Detail.Coord, function(h, xs, ys, zs)
 	if update then
 		DoUpdate()
 	end
-end, "Additional.Proximity:Unit.Detail.Coord")
+end, "Unit.Detail.Coord")
+
+module:OnDisable(function()
+	player = nil
+	DoUpdate()
+end)
+
+module:OnEnable(function()
+	player = util.Shared.PlayerAvailability.Test()
+	if player then
+		playerlast[1], playerlast[2], playerlast[3] = player.coordX, player.coordY, player.coordZ
+		PlayerTargetChanged()
+		PlayerTargetTargetChanged()
+		DoUpdate()
+	end
+end)
+
+module:RegisterEvent("Shared.PlayerAvailability.Change", function(h, available, id)
+	if available then
+		player = Inspect.Unit.Detail(id)
+		playerlast[1], playerlast[2], playerlast[3] = player.coordX, player.coordY, player.coordZ
+	else
+		player = nil
+	end
+	DoUpdate()
+end)

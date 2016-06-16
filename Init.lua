@@ -65,6 +65,10 @@ end
 
 Command.Event.Attach(Event.Addon.Load.End, function(h, identifier)
 	if identifier == addon.identifier then
-		print(addon.name .. " v" .. addon.toc.Version .. " loaded.")
+		for k, v in pairs(util.Modules) do
+			v:Enable()
+		end
+
+		printf("%s v%g loaded (%d modules, %d plugins)", addon.name, addon.toc.Version, (util.Modules:Count()), (util.Plugins:Count()))
 	end
 end, "Additional.Init:Addon.Load.End")

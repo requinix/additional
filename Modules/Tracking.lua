@@ -9,7 +9,7 @@ local pending = {}
 local reusable = {}
 local sources = { --[[
 	source = {
-		-- {Color and/or DefaultColors} Data Description [Icon] IdIndex [MaxIndex] NameIndex [Tier] {Value and/or ValueIndex} ValueFormat
+		-- {Color and/or DefaultColors} Data Description [Icon and/or IconIndex] IdIndex [Max and/or MaxIndex] NameIndex [Tier] {Value and/or ValueIndex} ValueFormat
 		Color = function(data, value, goal, max)
 			return { R, G, B }
 		end,
@@ -23,7 +23,11 @@ local sources = { --[[
 		Icon = function(data)
 			return texturesource, textureid
 		},
+		IconIndex = "index",
 		IdIndex = "index",
+		Max = function(data)
+			return value
+		end,
 		MaxIndex = "index",
 		NameIndex = "index",
 		Tier = function(value)
@@ -40,10 +44,12 @@ local sources = { --[[
 local AddBar
 local Find
 local HideBar
+local ProcessSource
 local Refresh
 local RemoveBar
 local ShowBar
 local Track
+local Untrack
 
 --- COMMANDS ---
 
@@ -71,7 +77,7 @@ module:RegisterCommand("remove <type> <name>", "Stop tracking a value", function
 	if type and not sources[type] then
 		module:Error("Invalid source: " .. type)
 	elseif source and bars[id] then
-		RemoveBar(id)
+		Untrack(id)
 	else
 		local lname = name:lower()
 		for k, v in pairs(pending) do
@@ -92,38 +98,16 @@ end)
 --- CONFIGURATION ---
 
 module:RegisterConfig(function(saved)
-	config.AutoTrackNearMax = saved.AutoTrackNearMax or 0.95
-
-	config.Colors = {}
-	for k, v in pairs(sources) do
-		if v.DefaultColors then
-			config.Colors[k] = {}
-			config.Colors[k].Normal = saved.Colors and saved.Colors[k] and saved.Colors[k].Normal or v.DefaultColors.Normal
-			config.Colors[k].Goal = saved.Colors and saved.Colors[k] and saved.Colors[k].Goal or v.DefaultColors.Goal
-			config.Colors[k].Max = saved.Colors and saved.Colors[k] and saved.Colors[k].Max or v.DefaultColors.Max
-		end
-	end
-
 	config.Tracking = {}
 	for k, v in pairs(saved.Tracking or {}) do
-		if sources[v.type] then
-			if sources[v.type].Data[v.id] then
-				Track(v.type, v.id, v.goal)
-			elseif not Track(v.type, v.name, v.goal) then
-				pending[k] = v
-			end
-		end
+		pending[k] = v
 	end
 end, function()
 	local c = {
-		AutoTrackNearMax = config.AutoTrackNearMax,
-		Colors = config.Colors,
 		Tracking = {}
 	}
 	for k, v in pairs(config.Tracking) do
-		if not v.autotrack then
-			c.Tracking[k] = v
-		end
+		c.Tracking[k] = v
 	end
 	for k, v in pairs(pending) do
 		c.Tracking[k] = v
@@ -133,57 +117,39 @@ end)
 
 --- EVENTS ---
 
-util.Events:Register("Tracking.SourceRegistration", function(h, source, data)
+module:RegisterEvent("Tracking.SourceRegistration", function(h, source, data)
 	sources[source] = data
-	util.Events:Invoke("Tracking.SourceUpdate", source, data.Data or {})
+	ProcessSource(source, data.Data or {})
 end)
 
-util.Events:Register("Tracking.SourceUpdate", function(h, source, data)
-	local automax
-	for k, v in pairs(data) do
-		sources[source].Data[k] = v
-		if bars[k] then
-			ShowBar(bars[k])
-		elseif pending[k] and Track(source, k, pending[k].goal) then
-			pending[k] = nil
-		end
-
-		-- auto track near max
-		if config.AutoTrackNearMax and sources[source].MaxIndex then
-			automax = (sources[source].Value and sources[source].Value(v) or v[sources[source].ValueIndex]) >= config.AutoTrackNearMax * v[sources[source].MaxIndex]
-			if bars[k] and bars[k].autotrack and not automax then
-				RemoveBar(k)
-			elseif not bars[k] and automax then
-				AddBar({
-					autotrack = true,
-					id = k,
-					name = v[sources[source].NameIndex],
-					type = source
-				})
-			end
-		end
-	end
+module:RegisterEvent("Tracking.SourceUpdate", function(h, source, data)
+	ProcessSource(source, data)
 end)
 
 --- FUNCTIONS ---
 
-AddBar = function(bardata)
-	bars[bardata.id] = bars[bardata.id] or table.remove(reusable) or {}
-	local b = bars[bardata.id]
-	local s = sources[bardata.type]
+AddBar = function(type, id, name, goal)
+	bars[id] = bars[id] or table.remove(reusable) or {}
+	local b = bars[id]
+	local s = sources[type]
 
-	b.data = bardata
-	b.sortable = bardata.type .. "," .. bardata.name:gsub("^[Tt]he%s+", ""):gsub("^[Aa]n?%s+", "")
+	b.data = {
+		goal = goal,
+		id = id,
+		name = name,
+		sortable = type .. "," .. name:gsub("^[Tt]he%s+", ""):gsub("^[Aa]n?%s+", ""),
+		type = type
+	}
 
 	if not barroot then
 		barroot = b
-	elseif barroot.sortable < b.sortable then
+	elseif barroot.data.sortable < b.data.sortable then
 		barroot.below = b
 		b.above = barroot
 		barroot = b
 	else
 		local above = barroot
-		while above.above and above.above.sortable > b.sortable do
+		while above.above and above.above.data.sortable > b.data.sortable do
 			above = above.above
 		end
 		if above.above then
@@ -201,7 +167,7 @@ AddBar = function(bardata)
 
 		b.Frame:EventAttach(Event.UI.Input.Mouse.Right.Click, function(h)
 			if h == b.Frame then
-				RemoveBar(b.data.id)
+				Untrack(b.data.id)
 			end
 		end, "Additional.Tracking.bars#" .. framecounter .. ".Frame:UI.Input.Mouse.Right.Click")
 	end
@@ -226,8 +192,15 @@ AddBar = function(bardata)
 		b.Icon:SetPoint("BOTTOMRIGHT", b.Frame, "BOTTOMLEFT", -2, 0)
 		b.Icon:SetWidth(b.Icon:GetHeight())
 	end
+	local iconsource, icon
 	if s.Icon then
-		b.Icon:SetTexture(s.Icon(bardata))
+		iconsource, icon = s.Icon(s.Data[id])
+	end
+	if iconsource and icon then
+		b.Icon:SetTexture(iconsource, icon)
+		b.Icon:SetVisible(true)
+	elseif s.IconIndex then
+		b.Icon:SetTexture("Rift", s.Data[id][s.IconIndex])
 		b.Icon:SetVisible(true)
 	else
 		b.Icon:SetVisible(false)
@@ -238,8 +211,8 @@ AddBar = function(bardata)
 		b.Label:SetEffectGlow({ strength = 4 })
 		b.Label:SetFontSize(12)
 	end
-	b.Label:SetPoint("CENTERRIGHT", s.Icon and b.Icon or b.Frame, "CENTERLEFT", -2, 0)
-	b.Label:SetText(bardata.name)
+	b.Label:SetPoint("CENTERRIGHT", b.Icon:GetVisible() and b.Icon or b.Frame, "CENTERLEFT", -2, 0)
+	b.Label:SetText(name)
 
 	if not b.Progress then
 		b.Progress = UI.CreateFrame("Text", "Additional.Tracking.bars#" .. framecounter .. ".Progress", b.Frame)
@@ -299,14 +272,26 @@ HideBar = function(bar)
 	bar.Frame:SetVisible(false)
 end
 
+ProcessSource = function(source, data)
+	for k, v in pairs(data) do
+		sources[source].Data[k] = v
+		if bars[k] then
+			ShowBar(bars[k])
+		elseif pending[k] and Track(source, k, pending[k].goal) then
+			pending[k] = nil
+		end
+	end
+end
+
 Refresh = function()
-	local olddata = {}
 	for k, v in pairs(bars) do
-		olddata[k] = v.data
 		RemoveBar(k)
 	end
-	for k, v in pairs(olddata) do
-		AddBar(v)
+	for k, v in pairs(config.Tracking) do
+		AddBar(v.type, v.id, v.name, v.goal)
+	end
+	for k, v in pairs(pending) do
+		Track(v.type, v.id, v.goal)
 	end
 end
 
@@ -324,17 +309,17 @@ RemoveBar = function(id)
 		end
 		if below then
 			below.above = above
-		else
+		elseif above then
 			barroot = above
 			barroot.Frame:SetPoint("BOTTOMRIGHT", UI.Native.Bag, 0.91, 0.0)
 			barroot.Frame:SetPoint("BOTTOMLEFT", UI.Native.Bag, 0.04, 0.0)
+		else
+			barroot = nil
 		end
 
 		bars[id].data = nil
-		bars[id].sortable = nil
 		table.insert(reusable, bars[id])
 		bars[id] = nil
-		config.Tracking[id] = nil
 	end
 end
 
@@ -349,43 +334,43 @@ ShowBar = function(bar)
 	if source.Tier then
 		tier, value, max = source.Tier(value)
 	else
-		max = source.MaxIndex and (type(source.MaxIndex) == "function" and source.MaxIndex(sourcedata) or sourcedata[source.MaxIndex])
+		max = source.Max and source.Max(sourcedata) or source.MaxIndex and sourcedata[source.MaxIndex]
 	end
 
-	local barcolor
-	local labelcolor
+	local color, colortype
 	local percent
 	local progress
 
 	if bar.data.goal then
 		if value < bar.data.goal then
-			barcolor = config.Colors[bar.data.type].Normal or source.Color(sourcedata, value, bar.data.goal)
-			labelcolor = util.Data.PaletteColors.White
+			color = util.Data.PaletteColors.White
+			colortype = "Normal"
 			percent = value / bar.data.goal
 			progress = string.format(source.ValueFormat .. " / " .. source.ValueFormat .. " (goal)", value, bar.data.goal)
 		elseif max then
-			barcolor = config.Colors[bar.data.type][value < max and "Goal" or "Max"] or source.Color(sourcedata, value, bar.data.goal, max)
-			labelcolor = value < max and util.Data.PaletteColors.White or barcolor
-			percent = value / max
+			color = util.Data.PaletteColors[value < max and "Orange" or "Red"]
+			colortype = value < max and "Goal" or "Max"
+			percent = math.min(value / max, 1.0)
 			progress = string.format(source.ValueFormat .. " / " .. source.ValueFormat, value, max)
 		else
-			barcolor = config.Colors[bar.data.type].Goal or source.Color(sourcedata, value, bar.data.goal)
-			labelcolor = barcolor
+			color = util.Data.PaletteColors.Orange
+			colortype = "Goal"
 			percent = 1.0
 			progress = string.format(source.ValueFormat .. " / " .. source.ValueFormat .. " (goal)", value, bar.data.goal)
 		end
 	elseif max then
-		barcolor = config.Colors[bar.data.type][value < max and "Normal" or "Max"] or source.Color(sourcedata, value, nil, max)
-		labelcolor = value < max and util.Data.PaletteColors.White or barcolor
+		color = util.Data.PaletteColors[value < max and "White" or "Red"]
+		colortype = value < max and "Normal" or "Max"
 		percent = math.min(value / max, 1.0)
 		progress = string.format(source.ValueFormat .. " / " .. source.ValueFormat, value, max)
 	else
-		barcolor = config.Colors[bar.data.type].Normal or source.Color(sourcedata, value)
-		labelcolor = util.Data.PaletteColors.White
+		color = util.Data.PaletteColors.White
+		colortype = "Normal"
 		percent = value > 0 and 1.0 or 0.0
 		progress = string.format(source.ValueFormat, value)
 	end
 
+	local barcolor = source.Color and source.Color(sourcedata, value, bar.data.goal, max) or source.DefaultColors and source.DefaultColors[colortype] or color
 	bar.Bar:SetPoint("BOTTOMRIGHT", bar.Frame, percent, 1.0)
 	bar.Bar:SetVisible(percent > 0.005)
 	util.UI.FillGradientLinear(bar.Bar, { x = 0, y = 1 },
@@ -396,14 +381,14 @@ ShowBar = function(bar)
 	)
 	util.UI.DrawOutline(bar.BarMask, barcolor, 1, {})
 
-	bar.Label:SetFontColor(unpack(labelcolor))
+	bar.Label:SetFontColor(unpack(color))
 
 	bar.Progress:SetText(progress)
-	bar.Progress:SetVisible(not tier or value < max)
+	bar.Progress:SetVisible(not tier or max and value < max)
 
 	bar.Tier:SetText(tier or "")
 	if tier then
-		if value == max then
+		if value >= max then
 			bar.Tier:SetPoint("CENTER", bar.Frame, "CENTER")
 		else
 			bar.Tier:SetPoint("CENTERLEFT", bar.Frame, "CENTERLEFT", 2, 0)
@@ -425,11 +410,31 @@ Track = function(type, key, goal)
 	config.Tracking[id].type = type
 
 	if bars[id] then
-		bars[id].autotrack = nil
+		bars[id].data.goal = config.Tracking[id].goal
 		ShowBar(bars[id])
 	else
-		AddBar(config.Tracking[id])
+		AddBar(type, id, config.Tracking[id].name, config.Tracking[id].goal)
 	end
 
 	return true
 end
+
+Untrack = function(id)
+	if bars[id] then
+		RemoveBar(id)
+		config.Tracking[id] = nil
+	end
+end
+
+module:OnDisable(function()
+	for k in pairs(bars) do
+		RemoveBar(k)
+	end
+	for k in pairs(sources) do
+		sources[k] = nil
+	end
+end)
+
+module:OnEnable(function()
+	Refresh()
+end)

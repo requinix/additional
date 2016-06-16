@@ -20,10 +20,13 @@ RunOnStartup = {
 	"Config.lua",
 	"Data.lua",
 	"Events.lua",
-	"EventsShared.lua",
 	"Exception.lua",
 	"Modules.lua",
+	"Plugins.lua",
 	"UI.lua",
+
+	-- SHARED
+	"Shared/PlayerAvailability.lua",
 
 	-- MODULES
 	"Modules/Dimension.lua",
@@ -33,9 +36,19 @@ RunOnStartup = {
 	"Modules/Tracking.lua",
 
 	-- PLUGINS
-	"Plugins/Currency.lua",
-	"Plugins/Item.lua",
-	"Plugins/Notoriety.lua",
+	"Plugins/Dimension/Clipboard.lua",
+	"Plugins/Dimension/Inspect.lua",
+	"Plugins/Dimension/Tooltip.lua",
+	"Plugins/Testing/Currency.lua",
+	"Plugins/Testing/DistToTarget.lua",
+	"Plugins/Testing/DumpKeys.lua",
+	"Plugins/Testing/Inspect.lua",
+	"Plugins/Testing/Item.lua",
+	"Plugins/Testing/Notoriety.lua",
+	"Plugins/Testing/Overlay.lua",
+	"Plugins/Tracking/Currency.lua",
+	"Plugins/Tracking/Item.lua",
+	"Plugins/Tracking/Notoriety.lua",
 
 	"Debug.lua"
 }
