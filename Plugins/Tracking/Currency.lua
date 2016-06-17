@@ -7,6 +7,7 @@ local icons = {
 }
 
 local source = {
+	AutoTracking = true,
 	Color = function(currency, value, goal)
 		return currency.rarity and util.Data.RiftColors.Item[currency.rarity] or util.Data.RiftColors.Item.common
 	end,

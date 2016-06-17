@@ -100,7 +100,6 @@ ACHIEVEMENT
 CURRENCY
 
 * Bug? Items are also tracked through bank slots
-* [v1.2] New: Auto-track currencies that are near max
 * Change: Need a better icon for credits - can't find anything official
 
 ITEM

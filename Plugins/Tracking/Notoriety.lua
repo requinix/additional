@@ -1,6 +1,11 @@
 local addon, util = ...
 local plugin = util.Plugins:Register("Tracking", "Notoriety")
 
+local tiers = {
+	{    0,     23000,      26000,       36000,     56000,     91000,      151000,      241000 },
+	{ "???", "Neutral", "Friendly", "Decorated", "Honored", "Revered", "Glorified", "Venerated" }
+}
+
 local source = {
 	Data = {},
 	DefaultColors = {
@@ -14,15 +19,14 @@ local source = {
 	ValueFormat = "%d",
 	ValueIndex = "notoriety",
 	Tier = function(value)
-		if     value <  23000  then return "???",       value,          nil
-		elseif value <= 26000  then return "Neutral",   value - 23000,  3000
-		elseif value <= 36000  then return "Friendly",  value - 26000,  10000
-		elseif value <= 56000  then return "Decorated", value - 36000,  20000
-		elseif value <= 91000  then return "Honored",   value - 56000,  35000
-		elseif value <= 151000 then return "Revered",   value - 91000,  60000
-		elseif value <  241000 then return "Glorified", value - 151000, 90000
-		else                        return "Venerated", value - 241000, nil
+		for i, v in ipairs(tiers[1]) do
+			if value < v then
+				return tiers[2][i - 1], value - tiers[1][i - 1], v - tiers[1][i - 1]
+			elseif value == v then
+				return tiers[2][i], value - tiers[1][i - 1], value - tiers[1][i - 1]
+			end
 		end
+		return "???", value, nil
 	end
 }
 

@@ -9,7 +9,8 @@ local pending = {}
 local reusable = {}
 local sources = { --[[
 	source = {
-		-- {Color and/or DefaultColors} Data Description [Icon and/or IconIndex] IdIndex [Max and/or MaxIndex] NameIndex [Tier] {Value and/or ValueIndex} ValueFormat
+		-- [AutoTracking] {Color and/or DefaultColors} Data Description [Icon and/or IconIndex] IdIndex [Max and/or MaxIndex] NameIndex [Tier] {Value and/or ValueIndex} ValueFormat
+		AutoTracking = bool,
 		Color = function(data, value, goal, max)
 			return { R, G, B }
 		end,
@@ -98,12 +99,14 @@ end)
 --- CONFIGURATION ---
 
 module:RegisterConfig(function(saved)
+	config.AutoTrack = saved.AutoTrack == nil and 0.95 or saved.AutoTrack
 	config.Tracking = {}
 	for k, v in pairs(saved.Tracking or {}) do
 		pending[k] = v
 	end
 end, function()
 	local c = {
+		AutoTrack = config.AutoTrack,
 		Tracking = {}
 	}
 	for k, v in pairs(config.Tracking) do
@@ -273,18 +276,29 @@ HideBar = function(bar)
 end
 
 ProcessSource = function(source, data)
+	local s
+	local value, max
 	for k, v in pairs(data) do
-		sources[source].Data[k] = v
+		s = sources[source]
+		s.Data[k] = v
 		if bars[k] then
 			ShowBar(bars[k])
 		elseif pending[k] and Track(source, k, pending[k].goal) then
 			pending[k] = nil
+		elseif config.AutoTrack and s.AutoTracking and (s.Max or s.MaxIndex) then
+			value = s.Value and s.Value(v) or v[s.ValueIndex]
+			max = s.Max and s.Max(v) or v[s.MaxIndex]
+			if value and max and value >= config.AutoTrack * max then
+				AddBar(source, v[s.IdIndex], v[s.NameIndex])
+			end
 		end
 	end
 end
 
 Refresh = function()
+	local oldbars = {}
 	for k, v in pairs(bars) do
+		oldbars[k] = v
 		RemoveBar(k)
 	end
 	for k, v in pairs(config.Tracking) do
@@ -292,6 +306,11 @@ Refresh = function()
 	end
 	for k, v in pairs(pending) do
 		Track(v.type, v.id, v.goal)
+	end
+	for k, v in pairs(oldbars) do
+		if not bars[k] then
+			AddBar(v.type, v.id, v.name, v.goal)
+		end
 	end
 end
 
@@ -317,6 +336,8 @@ RemoveBar = function(id)
 			barroot = nil
 		end
 
+		bars[id].above = nil
+		bars[id].below = nil
 		bars[id].data = nil
 		table.insert(reusable, bars[id])
 		bars[id] = nil
@@ -347,7 +368,7 @@ ShowBar = function(bar)
 			colortype = "Normal"
 			percent = value / bar.data.goal
 			progress = string.format(source.ValueFormat .. " / " .. source.ValueFormat .. " (goal)", value, bar.data.goal)
-		elseif max then
+		elseif max and max > 0 then
 			color = util.Data.PaletteColors[value < max and "Orange" or "Red"]
 			colortype = value < max and "Goal" or "Max"
 			percent = math.min(value / max, 1.0)
@@ -358,7 +379,7 @@ ShowBar = function(bar)
 			percent = 1.0
 			progress = string.format(source.ValueFormat .. " / " .. source.ValueFormat .. " (goal)", value, bar.data.goal)
 		end
-	elseif max then
+	elseif max and max > 0 then
 		color = util.Data.PaletteColors[value < max and "White" or "Red"]
 		colortype = value < max and "Normal" or "Max"
 		percent = math.min(value / max, 1.0)
