@@ -16,8 +16,18 @@ Preferred steps for (adding,) displaying, and (removing) information: (add items
 
 Units cannot be inspected until they've reached close proximity (generally <=150m) and/or line of sight; once out of sight they cannot be re-inspected, even with known IDs.
 
-Aggro distance appears variable but is most predictable using the outer (coordinate) distance. Starter area mobs (levels <= ~12) seem to have special treatment. Lowest distance appears to be <= player level minus 20 (at level 65). Pending further study. https://docs.google.com/spreadsheets/d/1QWDNM32ww_6q5CS5gBvD5Qfh3ml_nsGOlQejl_AbRT0
+Aggro distance appears variable but is most consistent using the outer (coordinate) distance. Starter area mobs (levels <= ~12) seem to have special treatment. Lowest distance appears to be <= player level minus 20 (at level 65). Pending further study. https://docs.google.com/spreadsheets/d/1QWDNM32ww_6q5CS5gBvD5Qfh3ml_nsGOlQejl_AbRT0
 
 Minion adventure data does not include whether it is rare (requires credits). MinionSender remembers past card IDs, attempts to send on the first action, and on the second click will shuffle if the card ID is the same.
 
 Consider a frame A pinned to a point on frame B, and frame B is pinned to a point on frame A. Recursion detection happens on the second visit to a frame. If the frames are pinned to different axes then it's possible but unlikely that the recursion will be avoided, depending on which axes are evaluated in what order.
+
+Notoriety is measured starting from 23000 (Neutral 0/3000) and stops at 241000 (Venerated). I don't know why that is, what it would mean to have a value <23000, or whether such a value is possible. There's also no indication of whether or where notoriety gains stop; not all factions end at the same levels, let alone go up to Venerated. So the workaround is looking for an otherwise unlikely exact value on a boundary: 26000 is assumed to mean the player is capped at Friendly.
+
+Unit specifier hierarchy: player, pet > target > mouseover
+
+Unit add/remove oddity #1: target +PT, enemy attack, PT attack enemy +PT2 +PT3, unknown +PT2 (!), death -PT3, -PT2, untarget -PT; enemy left with counter +1
+
+Unit add/remove oddity with PT3->PT target switch #2: target +PT, enemy attack, PT attack enemy +PT2 +PT3, unknown +PT2 (!), enemy switch to PT -PT3 +PT, death -PT2 (!no -PT), untarget -PT; enemy left with counter +1, PT with counter +1
+
+Unit add/remove oddity with PT->PT3 target switch #3: target +PT, enemy attack +PT +PT2, enemy switch to PT3 -PT +PT2 (!) +PT3, death -PT3, -PT2, untarget -PT; enemy left with counter +1

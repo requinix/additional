@@ -1,5 +1,7 @@
 ### GENERAL ###
 
+* Change: Deal with the fact that I'm accidentally borrowing LibUnitChange from another loaded addon
+
 ### CORE ###
 
 --- DATA ---
@@ -16,6 +18,7 @@
 
 * [v1.3] New: Menu helper
 * New: Button bar and buttons helper
+* New: "Linked list" helper for pinning frames to each other
 
 ### MODULES ###
 
@@ -27,8 +30,6 @@
 
 * [v1.4] New: Configuration
 * Change: Move to plugin system
-
---- OVERSEER ---
 
 --- PROXIMITY ---
 
@@ -56,6 +57,7 @@
 ITEMS
 
 * New: Provide shortcut buttons for actions to combine items (eg, dream ribbons -> dream bolts)
+* New: Automatically sort items into bags
 
 --- DIMENSION ---
 
@@ -72,16 +74,6 @@ TOOLTIP
 ARTIFACTS
 
 * New: Artifacts (requires tracking vial or Patron buff)
-
---- OVERSEER ---
-
-LOCAL
-
-* New: Show local players' classes/callings/roles, AFK/DC status
-
-WATCH
-
-* New: Watch for players or NPCs
 
 --- TESTING ---
 

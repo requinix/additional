@@ -1,7 +1,7 @@
 local addon, util = ...
 local plugin = util.Plugins:Register("Testing", "DistToTarget")
 
-plugin:Module():RegisterCommand("dist-to-target", "Show the distance between the player and target", function()
+plugin:RegisterCommand("dist-to-target", "Show the distance between the player and target", function()
 	local player = Inspect.Unit.Detail("player")
 	if not player or player.availability ~= "full" then
 		plugin:Error("Player not available")

@@ -64,7 +64,7 @@ end)
 
 module:RegisterCommand("pending", "Show pending status", function()
 	for k, v in pairs(pending) do
-		printf("Pending: %s '%s' (%s goal)", v.type, v.name, v.goal or "no")
+		printf("Pending %s: %s (%s goal)", v.type, v.name, v.goal or "no")
 	end
 end)
 
@@ -301,14 +301,18 @@ Refresh = function()
 		oldbars[k] = v
 		RemoveBar(k)
 	end
-	for k, v in pairs(config.Tracking) do
-		AddBar(v.type, v.id, v.name, v.goal)
-	end
 	for k, v in pairs(pending) do
-		Track(v.type, v.id, v.goal)
+		if Track(v.type, v.id, v.goal) then
+			pending[k] = nil
+		end
+	end
+	for k, v in pairs(config.Tracking) do
+		if not Track(v.type, v.id, v.goal) then
+			pending[k] = v
+		end
 	end
 	for k, v in pairs(oldbars) do
-		if not bars[k] then
+		if not bars[k] and not pending[k] and sources[v.type] then
 			AddBar(v.type, v.id, v.name, v.goal)
 		end
 	end

@@ -43,6 +43,8 @@ class util.Commands
 
 ]=]
 
+local commandkeys = {}
+
 local function commandCall(self, abbrev, command, ...)
 	local first = (...)
 	if not self[abbrev] then
@@ -80,19 +82,25 @@ local function commandRegister(self, abbrev, spec, description, callback)
 			local command = table.remove(argv, 1)
 			self:Call(abbrev, command, argv)
 		end, "Additional.Init:/add." .. abbrev)
+
+		commandkeys[#commandkeys + 1] = abbrev
+		commandkeys[abbrev] = {}
+		table.sort(commandkeys)
 	end
 	local command = spec:match("[^%s]+")
 	if not self[abbrev][command] then
 		self[abbrev][command] = { Callback = callback, Description = description, Spec = spec }
+		table.insert(commandkeys[abbrev], command)
+		table.sort(commandkeys[abbrev])
 	end
 end
 
 local function commandShowHelp(self, abbrev)
 	print("Commands:")
-	for k, v in pairs(self) do
-		if not abbrev or k == abbrev then
-			for command, info in pairs(v) do
-				printf("/add.%s %s - %s", k, info.Spec, info.Description)
+	for i, v in ipairs(commandkeys) do
+		if not abbrev or self[v] == abbrev then
+			for i2, v2 in ipairs(commandkeys[v]) do
+				printf("/add.%s %s - %s", v, self[v][v2].Spec, self[v][v2].Description)
 			end
 		end
 	end

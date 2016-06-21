@@ -13,7 +13,7 @@ overlaytext:SetPoint("CENTER", overlay, "CENTER")
 
 local export
 
-plugin:Module():RegisterCommand("overlay-copy <element>", "Create an overlay of an element", function(element)
+plugin:RegisterCommand("overlay-copy <element>", "Create an overlay of an element", function(element)
 	local e = assert(loadstring("return " .. element))()
 	if not e then
 		plugin:Error("Invalid element")
@@ -24,7 +24,7 @@ plugin:Module():RegisterCommand("overlay-copy <element>", "Create an overlay of 
 	overlay:SetVisible(true)
 end)
 
-plugin:Module():RegisterCommand("overlay-export <variable>", "Export the overlay to a global variable", function(variable)
+plugin:RegisterCommand("overlay-export <variable>", "Export the overlay to a global variable", function(variable)
 	if export then
 		_G[export] = nil
 	end
@@ -33,7 +33,7 @@ plugin:Module():RegisterCommand("overlay-export <variable>", "Export the overlay
 	_G[variable] = overlay
 end)
 
-plugin:Module():RegisterCommand("overlay-remove", "Remove the overlay", function()
+plugin:RegisterCommand("overlay-remove", "Remove the overlay", function()
 	overlay:SetVisible(false)
 end)
 

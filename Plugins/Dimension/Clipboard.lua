@@ -10,7 +10,7 @@ local function paste(t)
 	end
 end
 
-plugin:Module():RegisterCommand("copy", "Copy the selection", function()
+plugin:RegisterCommand("copy", "Copy the selection", function()
 	local selection, count = plugin:Module().GetSelection()
 	if count == 0 then
 		plugin:Error("No selection")
@@ -22,7 +22,7 @@ plugin:Module():RegisterCommand("copy", "Copy the selection", function()
 	end
 end)
 
-plugin:Module():RegisterCommand("paste <field>", "Paste information", function(field)
+plugin:RegisterCommand("paste <field>", "Paste information", function(field)
 	if not field then
 		plugin:Error("Field required")
 	elseif not clipboard then
@@ -34,7 +34,7 @@ plugin:Module():RegisterCommand("paste <field>", "Paste information", function(f
 	end
 end)
 
-plugin:Module():RegisterCommand("paste-location", "Paste location", function()
+plugin:RegisterCommand("paste-location", "Paste location", function()
 	if not clipboard then
 		plugin:Error("Clipboard is empty")
 	else
@@ -42,7 +42,7 @@ plugin:Module():RegisterCommand("paste-location", "Paste location", function()
 	end
 end)
 
-plugin:Module():RegisterCommand("paste-orientation", "Paste orientation", function()
+plugin:RegisterCommand("paste-orientation", "Paste orientation", function()
 	if not clipboard then
 		plugin:Error("Clipboard is empty")
 	else

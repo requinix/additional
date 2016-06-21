@@ -79,7 +79,7 @@ local function Unselect(items)
 end
 
 function module.GetSelection()
-	return selection, scount
+	return selected, scount
 end
 
 module:EventAttach(Event.Dimension.Layout.Remove, function(h, items)
@@ -91,7 +91,7 @@ module:EventAttach(Event.Dimension.Layout.Update, function(h, items)
 end, "Layout.Update")
 
 module:OnDisable(function()
-	Unselect(selection)
+	Unselect(selected)
 end)
 
 module:OnEnable(function()

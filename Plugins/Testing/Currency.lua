@@ -1,7 +1,7 @@
 local addon, util = ...
 local plugin = util.Plugins:Register("Testing", "Currency")
 
-plugin:Module():RegisterCommand("find-currency <name>", "Find a currency on the player", function(name)
+plugin:RegisterCommand("find-currency <name>", "Find a currency on the player", function(name)
 	local lname = name:lower()
 	if lname == "coin" then
 		dump(Inspect.Currency.Detail("coin"))

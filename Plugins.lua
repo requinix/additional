@@ -58,6 +58,9 @@ class plugin
 		Parameters
 			function callback - callback
 
+	void RegisterCommand(string spec, string description, function callback)
+	Wrapper for module:RegisterCommand(spec, description, callback)
+
 	void RegisterEvent(string key, function callback)
 	Wrapper for util.Events:Register that only executes if the plugin is enabled
 
@@ -111,6 +114,16 @@ local function cpluginOnEnable(self, callback)
 	util.Events:Register("Modules_" .. self.module.name .. ".Plugins_" .. self.name .. ".Enabled.Begin", callback)
 end
 
+local function cpluginRegisterCommand(self, spec, description, callback)
+	self:Module():RegisterCommand(spec, description, function(...)
+		if self.enabled then
+			callback(...)
+		else
+			self:Error("Plugin is disabled")
+		end
+	end)
+end
+
 local function cpluginRegisterEvent(self, key, callback)
 	util.Events:Register(key, function(...)
 		if self.enabled then
@@ -127,6 +140,7 @@ local class_plugin = { __index = {
 	Module = cpluginModule,
 	OnDisable = cpluginOnDisable,
 	OnEnable = cpluginOnEnable,
+	RegisterCommand = cpluginRegisterCommand,
 	RegisterEvent = cpluginRegisterEvent
 }}
 
@@ -143,13 +157,6 @@ class util.Plugins
 			int           - number of enabled plugins
 			int           - number of disabled plugins
 
-	plugin[] util.Plugins:Module(string module)
-	Get plugins for a module
-		Parameters
-			string module - module name
-		Returns
-			plugin[]      - plugins
-
 	plugin util.Plugins:Named(string module, string name)
 	Get a plugin entry by module and name
 		Parameters
@@ -157,6 +164,13 @@ class util.Plugins
 			string name   - plugin name
 		Returns
 			plugin        - plugin
+
+	plugin[] util.Plugins:NamedModule(string module)
+	Get plugins for a module
+		Parameters
+			string module - module name
+		Returns
+			plugin[]      - plugins
 
 	plugin util.Plugins:Register(string module, string name)
 	Register a module plugin
@@ -211,19 +225,19 @@ end
 
 util.Plugins = setmetatable({}, { __index = {
 	Count = pluginsCount,
-	Module = pluginsModule,
 	Named = pluginsNamed,
+	NamedModule = pluginsModule,
 	Register = pluginsRegister
 }})
 
 util.Events:Register("Modules.Enabled.End", function(h, module)
-	for k, v in pairs(util.Plugins:Module(module)) do
+	for k, v in pairs(util.Plugins:NamedModule(module)) do
 		v:Enable()
 	end
 end)
 
 util.Events:Register("Modules.Disabled.Begin", function(h, module)
-	for k, v in pairs(util.Plugins:Module(module)) do
+	for k, v in pairs(util.Plugins:NamedModule(module)) do
 		v:Disable()
 	end
 end)
