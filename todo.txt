@@ -4,16 +4,6 @@
 
 ### CORE ###
 
---- DATA ---
-
---- EVENTS ---
-
---- EXCEPTION ---
-
---- THREAD ---
-
-* New: Coroutine helper
-
 --- UI ---
 
 * [v1.3] New: Menu helper
@@ -21,10 +11,6 @@
 * New: "Linked list" helper for pinning frames to each other
 
 ### MODULES ###
-
---- ASSISTANT ---
-
---- DIMENSION ---
 
 --- MINIMAP ---
 
@@ -34,8 +20,6 @@
 --- PROXIMITY ---
 
 * New: Proximity on group and raid members, for party and raid frames (need to be in a party/raid lol)
-
---- TESTING ---
 
 --- TRACKING ---
 
@@ -61,10 +45,6 @@ ITEMS
 
 --- DIMENSION ---
 
-CLIPBOARD
-
-INSPECT
-
 TOOLTIP
 
 * Change: Restore tooltip if it is overwritten and then cleared
@@ -75,19 +55,11 @@ ARTIFACTS
 
 * New: Artifacts (requires tracking vial or Patron buff)
 
---- TESTING ---
-
-CURRENCY
-
-ITEM
-
-NOTORIETY
-
 --- TRACKING ---
 
 ACHIEVEMENT
 
-* New: Support for achievements
+* New: UI to search for achievements to track, rather than using find-achievement and internal IDs
 
 CURRENCY
 
@@ -97,8 +69,6 @@ CURRENCY
 ITEM
 
 * Change: Support combinable items (eg, 1 dream bolt <-> 99 dream ribbons)
-
-NOTORIETY
 
 QUEST
 

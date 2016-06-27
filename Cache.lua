@@ -21,7 +21,7 @@ class util.Cache
 
 local function cacheRegister(self, module, load, save)
 	local oldcache
-	util.Events:Register("Cache.Load", function(h, cache)
+	util.Event:Register("Cache.Load", function(h, cache)
 		util.Exception.try(function()
 			if not cache[module] then
 				oldcache = nil
@@ -34,13 +34,13 @@ local function cacheRegister(self, module, load, save)
 				load(cache[module].Static or {}, cache[module].Versioned or {}, false)
 			end
 		end):catch(function()
-			local m = util.Modules:Named(module)
+			local m = util.Module:Named(module)
 			m:Disable()
 			m:Error("Error loading cache data; module disabled")
 		end)
 	end)
-	util.Events:Register("Cache.Save", function(h, cache)
-		local m = util.Modules:Named(module)
+	util.Event:Register("Cache.Save", function(h, cache)
+		local m = util.Module:Named(module)
 		cache[module] = oldcache
 		if m.enabled then
 			util.Exception.try(function()
@@ -64,13 +64,13 @@ util.Cache = setmetatable({}, { __index = {
 
 Command.Event.Attach(Event.Addon.SavedVariables.Load.End, function(h, identifier)
 	if identifier == addon.identifier then
-		util.Events:Invoke("Cache.Load", AdditionalCache)
+		util.Event:Invoke("Cache.Load", AdditionalCache)
 	end
 end, "Additional.Cache:Addon.SavedVariables.Load.End")
 
 Command.Event.Attach(Event.Addon.SavedVariables.Save.Begin, function(h, identifier)
 	if identifier == addon.identifier then
 		AdditionalCache = { Timestamp = os.date("!%FT%TZ"), Version = util.Data.Version }
-		util.Events:Invoke("Cache.Save", AdditionalCache)
+		util.Event:Invoke("Cache.Save", AdditionalCache)
 	end
 end, "Additional.Cache:Addon.SavedVariables.Save.Begin")

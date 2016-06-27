@@ -19,8 +19,8 @@ class util.Config
 
 local function configRegister(self, module, load, save)
 	local oldconfig
-	local m = util.Modules:Named(module)
-	util.Events:Register("Config.Load", function(h, config)
+	local m = util.Module:Named(module)
+	util.Event:Register("Config.Load", function(h, config)
 		util.Exception.try(function()
 			oldconfig = config[module]
 			load(config[module] or {})
@@ -29,7 +29,7 @@ local function configRegister(self, module, load, save)
 			m:Error("Error loading configuration; module disabled")
 		end)
 	end)
-	util.Events:Register("Config.Save", function(h, config)
+	util.Event:Register("Config.Save", function(h, config)
 		config[module] = oldconfig
 		if m.enabled then
 			util.Exception.try(function()
@@ -48,13 +48,13 @@ util.Config = setmetatable({}, { __index = {
 
 Command.Event.Attach(Event.Addon.SavedVariables.Load.End, function(h, identifier)
 	if identifier == addon.identifier then
-		util.Events:Invoke("Config.Load", AdditionalConfig)
+		util.Event:Invoke("Config.Load", AdditionalConfig)
 	end
 end, "Additional.Config:Addon.SavedVariables.Load.End")
 
 Command.Event.Attach(Event.Addon.SavedVariables.Save.Begin, function(h, identifier)
 	if identifier == addon.identifier then
 		AdditionalConfig = {}
-		util.Events:Invoke("Config.Save", AdditionalConfig)
+		util.Event:Invoke("Config.Save", AdditionalConfig)
 	end
 end, "Additional.Config:Addon.SavedVariables.Save.Begin")

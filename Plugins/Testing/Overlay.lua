@@ -1,5 +1,5 @@
 local addon, util = ...
-local plugin = util.Plugins:Register("Testing", "Overlay")
+local plugin = util.Plugin:Register("Testing", "Overlay")
 
 local overlay = UI.CreateFrame("Frame", "Testing.Overlay.overlay", util.UI.Context)
 overlay:SetBackgroundColor(1.0, 1.0, 1.0, 0.5)

@@ -1,5 +1,5 @@
 local addon, util = ...
-local plugin = util.Plugins:Register("Testing", "DistToTarget")
+local plugin = util.Plugin:Register("Testing", "DistToTarget")
 
 plugin:RegisterCommand("dist-to-target", "Show the distance between the player and target", function()
 	local player = Inspect.Unit.Detail("player")

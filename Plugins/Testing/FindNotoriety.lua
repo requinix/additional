@@ -1,5 +1,5 @@
 local addon, util = ...
-local plugin = util.Plugins:Register("Testing", "Notoriety")
+local plugin = util.Plugin:Register("Testing", "FindNotoriety")
 
 plugin:RegisterCommand("find-notoriety <name>", "Find faction notoriety on the player", function(name)
 	local lname = name:lower()

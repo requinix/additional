@@ -2,7 +2,7 @@ Identifier = "Additional"
 Name = "Additional"
 NameShort = "Additional"
 Description = ""
-Version = "1.2"
+Version = "1.2.1"
 
 Author = "Kuraeno@Hailol"
 Email = "mail@requinix.net"
@@ -16,13 +16,14 @@ RunOnStartup = {
 
 	-- CORE
 	"Cache.lua",
-	"Commands.lua",
+	"Command.lua",
 	"Config.lua",
 	"Data.lua",
-	"Events.lua",
+	"Event.lua",
 	"Exception.lua",
-	"Modules.lua",
-	"Plugins.lua",
+	"Module.lua",
+	"Plugin.lua",
+	"Thread.lua",
 	"UI.lua",
 
 	-- SHARED
@@ -39,13 +40,15 @@ RunOnStartup = {
 	"Plugins/Dimension/Clipboard.lua",
 	"Plugins/Dimension/Inspect.lua",
 	"Plugins/Dimension/Tooltip.lua",
-	"Plugins/Testing/Currency.lua",
 	"Plugins/Testing/DistToTarget.lua",
 	"Plugins/Testing/DumpKeys.lua",
+	"Plugins/Testing/FindAchievement.lua",
+	"Plugins/Testing/FindCurrency.lua",
+	"Plugins/Testing/FindItem.lua",
+	"Plugins/Testing/FindNotoriety.lua",
 	"Plugins/Testing/Inspect.lua",
-	"Plugins/Testing/Item.lua",
-	"Plugins/Testing/Notoriety.lua",
 	"Plugins/Testing/Overlay.lua",
+	"Plugins/Tracking/Achievement.lua",
 	"Plugins/Tracking/Currency.lua",
 	"Plugins/Tracking/Item.lua",
 	"Plugins/Tracking/Notoriety.lua",

@@ -1,5 +1,5 @@
 local addon, util = ...
-local module = util.Modules:Register("Proximity", "p")
+local module = util.Module:Register("Proximity", "p")
 
 local player
 local playerlast = { 0, 0, 0 }

@@ -28,7 +28,7 @@ Command.Event.Attach(Event.Unit.Availability.Full, function(h, units)
 	for k, v in pairs(units) do
 		if v == "player" then
 			available = true
-			util.Events:Invoke("Shared.PlayerAvailability.Change", true, k)
+			util.Event:Invoke("Shared.PlayerAvailability.Change", true, k)
 			return
 		end
 	end
@@ -39,7 +39,7 @@ Command.Event.Attach(Event.Unit.Availability.Partial, function(h, units)
 		if v == "player" then
 			if available then
 				available = false
-				util.Events:Invoke("Shared.PlayerAvailability.Change", false, k)
+				util.Event:Invoke("Shared.PlayerAvailability.Change", false, k)
 			end
 			return
 		end

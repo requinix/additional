@@ -1,5 +1,5 @@
 local addon, util = ...
-local plugin = util.Plugins:Register("Dimension", "Edit")
+local plugin = util.Plugin:Register("Dimension", "Edit")
 
 plugin:RegisterCommand("get [<field>]", "Get dimension item information", function(field)
 	local selection, count = plugin:Module().GetSelection()

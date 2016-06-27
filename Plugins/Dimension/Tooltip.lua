@@ -1,5 +1,5 @@
 local addon, util = ...
-local plugin = util.Plugins:Register("Dimension", "Tooltip")
+local plugin = util.Plugin:Register("Dimension", "Tooltip")
 
 local changing = false
 

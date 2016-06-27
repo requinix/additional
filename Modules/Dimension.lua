@@ -1,5 +1,5 @@
 local addon, util = ...
-local module = util.Modules:Register("Dimension", "dim")
+local module = util.Module:Register("Dimension", "dim")
 
 --[=[
 
@@ -55,7 +55,7 @@ local function Process(items)
 	end
 
 	if changed then
-		util.Events:Invoke("Dimension.SelectionChange", selected, added, removed, scount, oldscount)
+		util.Event:Invoke("Dimension.SelectionChange", selected, added, removed, scount, oldscount)
 	end
 end
 
@@ -74,7 +74,7 @@ local function Unselect(items)
 	end
 
 	if changed then
-		util.Events:Invoke("Dimension.SelectionChange", selected, {}, removed, scount, oldscount)
+		util.Event:Invoke("Dimension.SelectionChange", selected, {}, removed, scount, oldscount)
 	end
 end
 

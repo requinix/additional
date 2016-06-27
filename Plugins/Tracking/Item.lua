@@ -1,5 +1,5 @@
 local addon, util = ...
-local plugin = util.Plugins:Register("Tracking", "Item")
+local plugin = util.Plugin:Register("Tracking", "Item")
 
 local history = {}
 local items = {}
@@ -70,11 +70,11 @@ ProcessSlots = function(slots)
 end
 
 plugin:OnEnable(function()
-	util.Events:Invoke("Tracking.SourceRegistration", "item", source)
+	util.Event:Invoke("Tracking.SourceRegistration", "item", source)
 
 	local bags = {}
 	local framestart = Inspect.Time.Frame()
-	util.Events.AttachWhile(Event.System.Update.Begin, function()
+	util.Event.AttachWhile(Event.System.Update.Begin, function()
 		if not bags or not next(bags) then
 			bags = Inspect.Item.Detail(Utility.Item.Slot.Inventory("bag"))
 			return true
@@ -102,16 +102,16 @@ plugin:OnEnable(function()
 
 		-- ready. dequeue bag and process slots
 		bags[k] = nil
-		util.Events:Invoke("Tracking.SourceUpdate", "item", ProcessSlots({ [k] = true }))
-		util.Events:Invoke("Tracking.SourceUpdate", "item", ProcessSlots(Utility.Item.Slot.Inventory(b)))
+		util.Event:Invoke("Tracking.SourceUpdate", "item", ProcessSlots({ [k] = true }))
+		util.Event:Invoke("Tracking.SourceUpdate", "item", ProcessSlots(Utility.Item.Slot.Inventory(b)))
 		return next(bags) ~= nil
 	end, "Additional.Tracking.Item:System.Update.Begin")
 end)
 
 plugin:EventAttach(Event.Item.Slot, function(h, updates)
-	util.Events:Invoke("Tracking.SourceUpdate", "item", ProcessSlots(updates))
+	util.Event:Invoke("Tracking.SourceUpdate", "item", ProcessSlots(updates))
 end, "Item.Slot")
 
 plugin:EventAttach(Event.Item.Update, function(h, updates)
-	util.Events:Invoke("Tracking.SourceUpdate", "item", ProcessSlots(updates))
+	util.Event:Invoke("Tracking.SourceUpdate", "item", ProcessSlots(updates))
 end, "Item.Update")

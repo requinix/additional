@@ -1,5 +1,5 @@
 local addon, util = ...
-local plugin = util.Plugins:Register("Testing", "Item")
+local plugin = util.Plugin:Register("Testing", "FindItem")
 
 plugin:RegisterCommand("find-item <name>", "Find item on the player", function(name)
 	local lname = name:lower()

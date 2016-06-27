@@ -1,5 +1,5 @@
 local addon, util = ...
-local plugin = util.Plugins:Register("Tracking", "Currency")
+local plugin = util.Plugin:Register("Tracking", "Currency")
 
 local icons = {
 	coin = "icons/currency.coin.png",
@@ -47,10 +47,10 @@ local function ProcessCurrencies(currencies)
 end
 
 plugin:EventAttach(Event.Currency, function(h, currencies)
-	util.Events:Invoke("Tracking.SourceUpdate", "currency", ProcessCurrencies(currencies))
-end, "Tracking:Currency")
+	util.Event:Invoke("Tracking.SourceUpdate", "currency", ProcessCurrencies(currencies))
+end, "Tracking.Currency:Currency")
 
 plugin:OnEnable(function()
-	util.Events:Invoke("Tracking.SourceRegistration", "currency", source)
-	util.Events:Invoke("Tracking.SourceUpdate", "currency", ProcessCurrencies(Inspect.Currency.List()))
+	util.Event:Invoke("Tracking.SourceRegistration", "currency", source)
+	util.Event:Invoke("Tracking.SourceUpdate", "currency", ProcessCurrencies(Inspect.Currency.List()))
 end)

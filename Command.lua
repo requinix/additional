@@ -2,9 +2,9 @@ local addon, util = ...
 
 --[=[
 
-class util.Commands
+class util.Command
 
-	any util.Commands:Call(string abbrev, string command [, mixed arg [, string args... ] ])
+	any util.Command:Call(string abbrev, string command [, mixed arg [, string args... ] ])
 	Call a registered command
 		Parameters
 			string abbrev  - module abbreviation
@@ -17,14 +17,14 @@ class util.Commands
 			"Module not found: <abbrev>" if there are no commands registered for that module
 			"Command not found: <command>" if there is no such command registered for that module
 
-	table util.Commands.ParseArguments(string argument)
+	table util.Command.ParseArguments(string argument)
 	Parse an argument string
 		Parameters
 			string argument - full argument as provided by Rift; does not include slash command
 		Returns
 			table           - table of parsed arguments; [0] is the full string, [1]+ are the individual arguments
 
-	void util.Commands:Register(string abbrev, string spec, string description, function callback)
+	void util.Command:Register(string abbrev, string spec, string description, function callback)
 	Register a slash command for a module
 		Parameters
 			string abbrev      - module abbreviation
@@ -32,11 +32,11 @@ class util.Commands
 			string description - shown with the help command
 			function callback  - callback to handle the event
 				Parameters
-					mixed args... - any arguments that were given and as parsed by Commands.ParseArgument
+					mixed args... - any arguments that were given and as parsed by Command.ParseArgument
 				Return
-					any           - any value to return through Commands.Call; meaningless for regular in-game slash commands
+					any           - any value to return through Command.Call; meaningless for regular in-game slash commands
 
-	void util.Commands:ShowHelp([string abbrev])
+	void util.Command:ShowHelp([string abbrev])
 	Show help for all commands or commands for the given module
 		Parameters
 			string abbrev - restrict output to commands for the given module
@@ -106,7 +106,7 @@ local function commandShowHelp(self, abbrev)
 	end
 end
 
-util.Commands = setmetatable({}, { __index = {
+util.Command = setmetatable({}, { __index = {
 	Call = commandCall,
 	ParseArguments = commandParseArguments,
 	Register = commandRegister,
@@ -114,8 +114,8 @@ util.Commands = setmetatable({}, { __index = {
 }})
 
 Command.Event.Attach(Command.Slash.Register("add"), function(h, arguments)
-	local argv = util.Commands.ParseArguments(arguments)
+	local argv = util.Command.ParseArguments(arguments)
 	if #argv == 0 or #argv >= 1 and argv[1] == "help" then
-		util.Commands:ShowHelp(argv[2])
+		util.Command:ShowHelp(argv[2])
 	end
-end, "Additional.Commands:/add")
+end, "Additional.Command:/add")

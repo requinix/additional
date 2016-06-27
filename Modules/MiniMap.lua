@@ -1,5 +1,5 @@
 local addon, util = ...
-local module = util.Modules:Register("MiniMap", "mm")
+local module = util.Module:Register("MiniMap", "mm")
 
 local cache = {}
 local config = {}

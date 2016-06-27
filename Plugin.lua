@@ -2,25 +2,25 @@ local addon, util = ...
 
 --[=[
 
-Plugins.Disabled.Begin(string module, string plugin), Modules_module.Plugins_plugin.Disabled.Begin()
+Plugin.Disabled.Begin(string module, string plugin), Module_module.Plugin_plugin.Disabled.Begin()
 Signals a plugin is going to be disabled
 	Parameters
 		string module - plugin's module name
 		string plugin - plugin name
 
-Plugins.Disabled.End(string module, string plugin), Modules_module.Plugins_plugin.Disabled.End()
+Plugin.Disabled.End(string module, string plugin), Module_module.Plugin_plugin.Disabled.End()
 Signals a plugin has been disabled
 	Parameters
 		string module - plugin's module name
 		string plugin - plugin name
 
-Plugins.Enabled.Begin(string module, string plugin), Modules_module.Plugins_plugin.Enabled.Begin()
+Plugin.Enabled.Begin(string module, string plugin), Module_module.Plugin_plugin.Enabled.Begin()
 Signals a plugin is going to be enabled; abortable
 	Parameters
 		string module - plugin's module name
 		string plugin - plugin name
 
-Plugins.Enabled.End(string module, string plugin), Modules_module.Plugins_plugin.Enabled.End()
+Plugin.Enabled.End(string module, string plugin), Module_module.Plugin_plugin.Enabled.End()
 Signals a plugin has been enabled
 	Parameters
 		string module - plugin's module name
@@ -62,29 +62,29 @@ class plugin
 	Wrapper for module:RegisterCommand(spec, description, callback)
 
 	void RegisterEvent(string key, function callback)
-	Wrapper for util.Events:Register that only executes if the plugin is enabled
+	Wrapper for util.Event:Register that only executes if the plugin is enabled
 
 ]=]
 
 local function cpluginDisable(self)
 	if self.enabled then
-		util.Events:Invoke("Module_" .. self.module.name .. ".Plugins_" .. self.name .. ".Disabled.Begin")
-		util.Events:Invoke("Plugins.Disabled.Begin", self.module.name, self.name)
+		util.Event:Invoke("Module_" .. self.module.name .. ".Plugin_" .. self.name .. ".Disabled.Begin")
+		util.Event:Invoke("Plugin.Disabled.Begin", self.module.name, self.name)
 		self.enabled = false
-		util.Events:Invoke("Plugins.Disabled.End", self.module.name, self.name)
-		util.Events:Invoke("Module_" .. self.module.name .. ".Plugins_" .. self.name .. ".Enabled.Begin")
+		util.Event:Invoke("Plugin.Disabled.End", self.module.name, self.name)
+		util.Event:Invoke("Module_" .. self.module.name .. ".Plugin_" .. self.name .. ".Enabled.Begin")
 	end
 end
 
 local function cpluginEnable(self)
 	if
 		not self.enabled and
-		util.Events:Invoke("Modules_" .. self.module.name .. ".Plugins_" .. self.name .. ".Enabled.Begin") and
-		util.Events:Invoke("Plugins.Enabled.Begin", self.module.name, self.name)
+		util.Event:Invoke("Module_" .. self.module.name .. ".Plugin_" .. self.name .. ".Enabled.Begin") and
+		util.Event:Invoke("Plugin.Enabled.Begin", self.module.name, self.name)
 	then
 		self.enabled = true
-		util.Events:Invoke("Plugins.Enabled.End", self.module.name, self.name)
-		util.Events:Invoke("Modules_" .. self.module.name .. ".Plugins_" .. self.name .. ".Enabled.End")
+		util.Event:Invoke("Plugin.Enabled.End", self.module.name, self.name)
+		util.Event:Invoke("Module_" .. self.module.name .. ".Plugin_" .. self.name .. ".Enabled.End")
 	end
 end
 
@@ -107,11 +107,11 @@ local function cpluginModule(self)
 end
 
 local function cpluginOnDisable(self, callback)
-	util.Events:Register("Modules_" .. self.module.name .. ".Plugins_" .. self.name .. ".Disabled.End", callback)
+	util.Event:Register("Module_" .. self.module.name .. ".Plugin_" .. self.name .. ".Disabled.End", callback)
 end
 
 local function cpluginOnEnable(self, callback)
-	util.Events:Register("Modules_" .. self.module.name .. ".Plugins_" .. self.name .. ".Enabled.Begin", callback)
+	util.Event:Register("Module_" .. self.module.name .. ".Plugin_" .. self.name .. ".Enabled.Begin", callback)
 end
 
 local function cpluginRegisterCommand(self, spec, description, callback)
@@ -125,7 +125,7 @@ local function cpluginRegisterCommand(self, spec, description, callback)
 end
 
 local function cpluginRegisterEvent(self, key, callback)
-	util.Events:Register(key, function(...)
+	util.Event:Register(key, function(...)
 		if self.enabled then
 			callback(...)
 		end
@@ -146,9 +146,9 @@ local class_plugin = { __index = {
 
 --[=[
 
-class util.Plugins
+class util.Plugin
 
-	int, int, int util.Plugins:Count([string module])
+	int, int, int util.Plugin:Count([string module])
 	Get a count of the number of registered, enabled, and disabled plugins, optionally filtered to a specific module
 		Parameters
 			string module - module name
@@ -157,7 +157,7 @@ class util.Plugins
 			int           - number of enabled plugins
 			int           - number of disabled plugins
 
-	plugin util.Plugins:Named(string module, string name)
+	plugin util.Plugin:Named(string module, string name)
 	Get a plugin entry by module and name
 		Parameters
 			string module - module name
@@ -165,14 +165,14 @@ class util.Plugins
 		Returns
 			plugin        - plugin
 
-	plugin[] util.Plugins:NamedModule(string module)
+	plugin[] util.Plugin:NamedModule(string module)
 	Get plugins for a module
 		Parameters
 			string module - module name
 		Returns
 			plugin[]      - plugins
 
-	plugin util.Plugins:Register(string module, string name)
+	plugin util.Plugin:Register(string module, string name)
 	Register a module plugin
 		Parameters
 			string module - module name
@@ -216,28 +216,28 @@ end
 local function pluginsRegister(self, module, name)
 	local plugin = setmetatable({
 		enabled = false,
-		module = util.Modules:Named(module),
+		module = util.Module:Named(module),
 		name = name
 	}, class_plugin)
 	self[module .. ";" .. name] = plugin
 	return plugin
 end
 
-util.Plugins = setmetatable({}, { __index = {
+util.Plugin = setmetatable({}, { __index = {
 	Count = pluginsCount,
 	Named = pluginsNamed,
 	NamedModule = pluginsModule,
 	Register = pluginsRegister
 }})
 
-util.Events:Register("Modules.Enabled.End", function(h, module)
-	for k, v in pairs(util.Plugins:NamedModule(module)) do
+util.Event:Register("Module.Enabled.End", function(h, module)
+	for k, v in pairs(util.Plugin:NamedModule(module)) do
 		v:Enable()
 	end
 end)
 
-util.Events:Register("Modules.Disabled.Begin", function(h, module)
-	for k, v in pairs(util.Plugins:NamedModule(module)) do
+util.Event:Register("Module.Disabled.Begin", function(h, module)
+	for k, v in pairs(util.Plugin:NamedModule(module)) do
 		v:Disable()
 	end
 end)

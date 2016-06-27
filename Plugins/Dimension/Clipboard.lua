@@ -1,5 +1,5 @@
 local addon, util = ...
-local plugin = util.Plugins:Register("Dimension", "Clipboard")
+local plugin = util.Plugin:Register("Dimension", "Clipboard")
 
 local clipboard
 local selectioncount
@@ -47,6 +47,14 @@ plugin:RegisterCommand("paste-orientation", "Paste orientation", function()
 		plugin:Error("Clipboard is empty")
 	else
 		paste({ pitch = clipboard.Dimension.pitch, roll = clipboard.Dimension.roll, yaw = clipboard.Dimension.yaw })
+	end
+end)
+
+plugin:RegisterCommand("paste-plane", "Paste plane (XZ) coordinates", function()
+	if not clipboard then
+		plugin:Error("Clipboard is empty")
+	else
+		paste({ coordX = clipboard.Dimension.coordX, coordZ = clipboard.Dimension.coordZ })
 	end
 end)
 

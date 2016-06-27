@@ -1,5 +1,5 @@
 local addon, util = ...
-local plugin = util.Plugins:Register("Testing", "DumpKeys")
+local plugin = util.Plugin:Register("Testing", "DumpKeys")
 
 plugin:RegisterCommand("dumpkeys <value>", "Dump keys from a table", function(arg)
 	local value = assert(loadstring("return " .. arg))()

@@ -1,5 +1,5 @@
 local addon, util = ...
-local module = util.Modules:Register("Tracking", "track")
+local module = util.Module:Register("Tracking", "track")
 
 local bars = {}
 local barroot
@@ -9,7 +9,7 @@ local pending = {}
 local reusable = {}
 local sources = { --[[
 	source = {
-		-- [AutoTracking] {Color and/or DefaultColors} Data Description [Icon and/or IconIndex] IdIndex [Max and/or MaxIndex] NameIndex [Tier] {Value and/or ValueIndex} ValueFormat
+		-- [AutoTracking] [Color and/or DefaultColors] Data Description [Icon and/or IconIndex] IdIndex [Load] [Max and/or MaxIndex] NameIndex [Tier] {Value and/or ValueIndex} ValueFormat
 		AutoTracking = bool,
 		Color = function(data, value, goal, max)
 			return { R, G, B }
@@ -26,6 +26,9 @@ local sources = { --[[
 		},
 		IconIndex = "index",
 		IdIndex = "index",
+		Load = function(key)
+			return data
+		end,
 		Max = function(data)
 			return value
 		end,
@@ -123,6 +126,14 @@ end)
 module:RegisterEvent("Tracking.SourceRegistration", function(h, source, data)
 	sources[source] = data
 	ProcessSource(source, data.Data or {})
+
+	if data.Load then
+		for k, v in pairs(pending) do
+			if v.type == source then
+				data.Load(k)
+			end
+		end
+	end
 end)
 
 module:RegisterEvent("Tracking.SourceUpdate", function(h, source, data)
@@ -268,6 +279,14 @@ Find = function(type, key)
 			return v
 		end
 	end
+
+	if sources[type].Load then
+		key = sources[type].Load(key)
+		if key and sources[type].Data[key] then
+			return sources[type].Data[key]
+		end
+	end
+
 	return nil
 end
 
@@ -450,6 +469,9 @@ Untrack = function(id)
 		config.Tracking[id] = nil
 	end
 end
+
+module.Track = Track
+module.Untrack = Untrack
 
 module:OnDisable(function()
 	for k in pairs(bars) do

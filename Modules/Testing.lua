@@ -1,2 +1,2 @@
 local addon, util = ...
-local module = util.Modules:Register("Testing", "test")
+local module = util.Module:Register("Testing", "test")

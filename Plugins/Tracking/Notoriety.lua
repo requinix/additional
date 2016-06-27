@@ -1,5 +1,5 @@
 local addon, util = ...
-local plugin = util.Plugins:Register("Tracking", "Notoriety")
+local plugin = util.Plugin:Register("Tracking", "Notoriety")
 
 local tiers = {
 	{    0,     23000,      26000,       36000,     56000,     91000,      151000,      241000 },
@@ -31,10 +31,10 @@ local source = {
 }
 
 plugin:OnEnable(function()
-	util.Events:Invoke("Tracking.SourceRegistration", "notoriety", source)
-	util.Events:Invoke("Tracking.SourceUpdate", "notoriety", Inspect.Faction.Detail(Inspect.Faction.List()))
+	util.Event:Invoke("Tracking.SourceRegistration", "notoriety", source)
+	util.Event:Invoke("Tracking.SourceUpdate", "notoriety", Inspect.Faction.Detail(Inspect.Faction.List()))
 end)
 
 plugin:EventAttach(Event.Faction.Notoriety, function(h, notoriety)
-	util.Events:Invoke("Tracking.SourceUpdate", "notoriety", Inspect.Faction.Detail(notoriety))
+	util.Event:Invoke("Tracking.SourceUpdate", "notoriety", Inspect.Faction.Detail(notoriety))
 end, "Faction.Notoriety")

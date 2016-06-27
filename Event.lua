@@ -52,9 +52,9 @@ local class_event = { __index = {
 
 --[=[
 
-class util.Events
+class util.Event
 
-	void util.Events.AttachWhile(table event, function callback, string name)
+	void util.Event.AttachWhile(table event, function callback, string name)
 	Attach a callback to an event and auotmatically detach if the callback ever returns false, wrapping Command.Event.Attach/Detach
 		Parameters
 			table event       - event table as seen in the Event hierarchy
@@ -66,7 +66,7 @@ class util.Events
 					bool    - true to continue watching the event, false to detach the handler
 			string name       - event handler name
 
-	bool util.Events:Invoke(string key [, any... ])
+	bool util.Event:Invoke(string key [, any... ])
 	Invoke an event, wrapping the function returned by Utility.Event.Create
 		Parameters
 			string key - event name
@@ -74,7 +74,7 @@ class util.Events
 		Returns
 			bool       - whether the event completed without being aborted
 
-	void util.Events:Register(string key, function callback)
+	void util.Event:Register(string key, function callback)
 	Register an event listener, wrapping Utility.Event.Create and Command.Event.Attach
 		Parameters
 			string key        - event name
@@ -109,7 +109,7 @@ local function eventsRegister(self, key, callback)
 	Command.Event.Attach(self[key].Event, self[key].Event:GetDispatcher(callback), string.format("%s.Event.%s#%d", addon.identifier, key, self[key].Count))
 end
 
-util.Events = setmetatable({}, { __index = {
+util.Event = setmetatable({}, { __index = {
 	AttachWhile = eventsAttachWhile,
 	Invoke = eventsInvoke,
 	Register = eventsRegister

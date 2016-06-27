@@ -1,5 +1,5 @@
 local addon, util = ...
-local plugin = util.Plugins:Register("Testing", "Currency")
+local plugin = util.Plugin:Register("Testing", "FindCurrency")
 
 plugin:RegisterCommand("find-currency <name>", "Find a currency on the player", function(name)
 	local lname = name:lower()

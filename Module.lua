@@ -2,22 +2,22 @@ local addon, util = ...
 
 --[=[
 
-Modules.Disabled.Begin(string module), Modules_module.Disabled.Begin()
+Module.Disabled.Begin(string module), Module_module.Disabled.Begin()
 Signals a module is going to be disabled
 	Parameters
 		string module - module name
 
-Modules.Disabled.End(string module), Modules_module.Disabled.End()
+Module.Disabled.End(string module), Module_module.Disabled.End()
 Signals a module has been disabled
 	Parameters
 		string module - module name
 
-Modules.Enabled.Begin(string module), Modules_module.Enabled.Begin()
+Module.Enabled.Begin(string module), Module_module.Enabled.Begin()
 Signals a module is going to be enabled; abortable
 	Parameters
 		string module - module name
 
-Modules.Enabled.End(string module), Modules_module.Enabled.End()
+Module.Enabled.End(string module), Module_module.Enabled.End()
 Signals a module has been enabled
 	Parameters
 		string module - module name
@@ -53,31 +53,31 @@ class module
 	Wrapper for Cache:Register(module name, load, save)
 
 	void RegisterCommand(string spec, string description, function callback)
-	Wrapper for Commands:Register(module abbreviation, spec, description, callback)
+	Wrapper for Command:Register(module abbreviation, spec, description, callback)
 
 	void RegisterConfig(function load, function save)
 	Wrapper for Config:Register(module name, load, save)
 
 	void RegisterEvent(string key, function callback)
-	Wrapper for util.Events:Register that only executes if the module is enabled
+	Wrapper for util.Event:Register that only executes if the module is enabled
 
 ]=]
 
 local function cmoduleDisable(self)
 	if self.enabled then
-		util.Events:Invoke("Modules_" .. self.name .. ".Disabled.Begin")
-		util.Events:Invoke("Modules.Disabled.Begin", self.name)
+		util.Event:Invoke("Module_" .. self.name .. ".Disabled.Begin")
+		util.Event:Invoke("Module.Disabled.Begin", self.name)
 		self.enabled = false
-		util.Events:Invoke("Modules.Disabled.End", self.name)
-		util.Events:Invoke("Modules_" .. self.name .. ".Disabled.End")
+		util.Event:Invoke("Module.Disabled.End", self.name)
+		util.Event:Invoke("Module_" .. self.name .. ".Disabled.End")
 	end
 end
 
 local function cmoduleEnable(self)
-	if not self.enabled and util.Events:Invoke("Modules_" .. self.name .. ".Enabled.Begin") and util.Events:Invoke("Modules.Enabled.Begin", self.name) then
+	if not self.enabled and util.Event:Invoke("Module_" .. self.name .. ".Enabled.Begin") and util.Event:Invoke("Module.Enabled.Begin", self.name) then
 		self.enabled = true
-		util.Events:Invoke("Modules.Enabled.End", self.name)
-		util.Events:Invoke("Modules_" .. self.name .. ".Enabled.End")
+		util.Event:Invoke("Module.Enabled.End", self.name)
+		util.Event:Invoke("Module_" .. self.name .. ".Enabled.End")
 	end
 end
 
@@ -96,11 +96,11 @@ local function cmoduleEventAttach(self, event, callback, name)
 end
 
 local function cmoduleOnDisable(self, callback)
-	util.Events:Register("Modules_" .. self.name .. ".Disabled.End", callback)
+	util.Event:Register("Module_" .. self.name .. ".Disabled.End", callback)
 end
 
 local function cmoduleOnEnable(self, callback)
-	util.Events:Register("Modules_" .. self.name .. ".Enabled.Begin", callback)
+	util.Event:Register("Module_" .. self.name .. ".Enabled.Begin", callback)
 end
 
 local function cmoduleRegisterCache(self, load, save)
@@ -108,7 +108,7 @@ local function cmoduleRegisterCache(self, load, save)
 end
 
 local function cmoduleRegisterCommand(self, spec, description, callback)
-	util.Commands:Register(self.abbrev, spec, description, function(...)
+	util.Command:Register(self.abbrev, spec, description, function(...)
 		if self.enabled then
 			callback(...)
 		else
@@ -122,7 +122,7 @@ local function cmoduleRegisterConfig(self, load, save)
 end
 
 local function cmoduleRegisterEvent(self, key, callback)
-	util.Events:Register(key, function(...)
+	util.Event:Register(key, function(...)
 		if self.enabled then
 			callback(...)
 		end
@@ -144,23 +144,23 @@ local class_module = { __index = {
 
 --[=[
 
-class util.Modules
+class util.Module
 
-	int, int, int util.Modules:Count()
+	int, int, int util.Module:Count()
 	Get a count of the number of registered, enabled, and disabled modules
 		Returns
 			int - total number of modules
 			int - number of enabled modules
 			int - number of disabled modules
 
-	module util.Modules:Named(string name)
+	module util.Module:Named(string name)
 	Get a module entry by name
 		Parameters
 			string name - module name
 		Returns
 			module      - module
 
-	module util.Modules:Register(string name, string abbrev)
+	module util.Module:Register(string name, string abbrev)
 	Register a module
 		Parameters
 			string name   - module name
@@ -199,7 +199,7 @@ local function modulesRegister(self, name, abbrev)
 	return module
 end
 
-util.Modules = setmetatable({}, { __index = {
+util.Module = setmetatable({}, { __index = {
 	Count = modulesCount,
 	Named = modulesNamed,
 	Register = modulesRegister
